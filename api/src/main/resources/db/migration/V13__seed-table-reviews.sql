@@ -1,4 +1,4 @@
-INSERT INTO reviews (grade, comment, order_id)
+INSERT INTO reviews (grade, comment, occupation_id)
 VALUES
     (5, 'Excelente serviço, entrega rápida!', 1),
     (4, 'Gostei do hamburguer, mas demorou um pouco a chegar.', 2),
