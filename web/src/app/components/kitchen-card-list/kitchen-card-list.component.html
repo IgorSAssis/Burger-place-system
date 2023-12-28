@@ -1,0 +1,41 @@
+<ul class="card-list">
+  <li *ngFor="let kitchenCard of kitchenCards">
+    <strong>Comanda #{{ kitchenCard.cardId | stringPadding : 4 : "0" }}</strong>
+    <ul class="card-items">
+      <li *ngFor="let item of kitchenCard.items">
+        <div>
+          <input
+            type="checkbox"
+            id="cmd-{{ kitchenCard.cardId }}-item-{{ item.id }}"
+          />
+          <label for="cmd-{{ kitchenCard.cardId }}-item-{{ item.id }}">
+            <b>{{ item.amount }} x {{ item.name }}</b>
+            {{ item.description ? "(" + item.description + ")" : "" }}
+          </label>
+        </div>
+
+        <p *ngIf="item.observation">
+          <b>OBS:</b>
+          {{ item.observation }}
+        </p>
+      </li>
+    </ul>
+
+    <div>
+      <p>
+        <b>Numero da mesa: </b>
+        {{ kitchenCard.boardNumber }}
+      </p>
+      <p>
+        <b>Aberto as </b>
+        {{ kitchenCard.openedAt }}
+      </p>
+    </div>
+
+    <button [class.blue]="kitchenCard.type === 'TO_DO'">
+      {{
+        kitchenCard.type === "TO_DO" ? "Iniciar preparo" : "Finalizar preparo"
+      }}
+    </button>
+  </li>
+</ul>

@@ -1,0 +1,42 @@
+:host {
+  height: 100%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep p.breadcrumb {
+  margin-bottom: 20px;
+}
+
+section {
+  flex: 1;
+}
+
+section > button {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--gray-border);
+  padding-bottom: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: var(--gray-font);
+}
+
+section > button span:first-child {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 2.2rem;
+}
+
+section > button span:last-child {
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.6rem;
+  color: var(--black);
+}

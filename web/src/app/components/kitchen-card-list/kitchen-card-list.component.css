@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.card-list {
+  display: flex;
+  align-items: center;
+  overflow-y: scroll;
+  gap: 20px;
+  padding: 20px 16px;
+  height: 100%
+}
+
+.card-list > li {
+  flex: 0 0 340px;
+  background-color: var(--white);
+  border: 1px solid var(--gray-border);
+  padding: 30px 20px;
+  border-radius: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.card-list > li:hover {
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+.card-list > li strong {
+  display: block;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--gray-var-1);
+  color: var(--gray-var-1);
+  padding-bottom: 8px;
+}
+
+.card-list > li .card-items {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--gray-var-1);
+  padding: 12px 0;
+  gap: 10px;
+  height: 160px;
+  overflow: scroll;
+}
+
+.card-list > li .card-items li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-list > li .card-items li div input {
+  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+}
+
+.card-list > li .card-items li div label b {
+  color: var(--gray-font-var-2);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.card-list > li .card-items li div label {
+  color: var(--gray-font-var-3);
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+.card-list > li .card-items li p {
+  color: var(--gray-font-var-3);
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.card-list > li .card-items li p b {
+  color: var(--gray-font-var-2);
+  font-weight: 700;
+}
+
+.card-list > li > div {
+  padding: 12px 0;
+}
+
+.card-list > li > div p {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--black);
+}
+
+.card-list > li > div p b {
+  color: var(--gray-font-var-2);
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.card-list > li > button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px 0;
+  background-color: var(--green);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 1.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.card-list > li > button:hover {
+  background-color: var(--green-hover);
+}
+
+.card-list > li > button.blue {
+  background-color: var(--blue);
+}
+
+.card-list > li > button.blue:hover {
+  background-color: var(--blue-hover);
+}

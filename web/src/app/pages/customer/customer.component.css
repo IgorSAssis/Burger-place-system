@@ -90,7 +90,7 @@
 
 .customers-page-container .products li > p {
   width: 100%;
-  background-color: var(--red);
+  background-color: var(--blue);
   color: var(--white);
   font-size: 1.6rem;
   font-weight: 500;
@@ -122,11 +122,12 @@ aside .item button {
 
   display: flex;
   align-items: center;
+
+  transition: 0.2s;
 }
 
 aside .item button:hover {
   background-color: rgba(0, 0, 0, 0.03);
-  transition: 0.2s;
 }
 
 aside .item .expandable {

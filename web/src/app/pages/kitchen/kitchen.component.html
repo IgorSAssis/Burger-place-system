@@ -1,0 +1,37 @@
+<app-breadcrumb [currentURI]="'Cozinha'" />
+
+<section>
+  <button>
+    <span>
+      <app-svg-image
+        [path]="'../../../assets/arrow.svg'"
+        [width]="'32px'"
+        [height]="'32px'"
+        [color]="'var(--gray-font)'"
+      />
+      Em andamento
+    </span>
+    <span> Total: 10 </span>
+  </button>
+  <div class="expandable">
+    <app-kitchen-card-list [kitchenCards]="inProgressCards" />
+  </div>
+</section>
+
+<section>
+  <button>
+    <span>
+      <app-svg-image
+        [path]="'../../../assets/arrow.svg'"
+        [width]="'32px'"
+        [height]="'32px'"
+        [color]="'var(--gray-font)'"
+      />
+      Pendentes
+    </span>
+    <span> Total: 10 </span>
+  </button>
+  <div class="expandable">
+    <app-kitchen-card-list [kitchenCards]="todoCards" />
+  </div>
+</section>
