@@ -1,0 +1,50 @@
+ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+ol li {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+ol li > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background-color: var(--gray-var-2);
+  color: var(--white);
+  padding: 28px 18px;
+}
+
+ol li > div:first-child.available {
+  background-color: var(--green);
+}
+
+ol li > div:first-child span {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+ol li > div:first-child b {
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+ol li > div:last-child {
+  padding: 18px 12px;
+  background-color: var(--white);
+}
+
+ol li > div:last-child p b {
+  font-weight: 500;
+}
+
+ol li > div:last-child p span {
+  font-weight: 400;
+  color: var(--gray-font);
+}

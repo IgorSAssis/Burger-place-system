@@ -1,0 +1,14 @@
+.breadcrumb {
+  display: flex;
+}
+
+.breadcrumb a {
+  color: var(--blue);
+}
+
+.breadcrumb a:not(:last-child)::after {
+  content: "/";
+  margin: 0 10px;
+  color: var(--black);
+  pointer-events: none;
+}

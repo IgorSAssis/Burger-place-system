@@ -1,0 +1,19 @@
+<ol>
+  <li *ngFor="let board of boards">
+    <div [class.available]="!board.occupied">
+      <span>nº</span>
+      <b>{{ board.boardNumber | number : "2.0" }}</b>
+    </div>
+
+    <div>
+      <p>
+        <b>Capacidade: </b>
+        <span>{{ board.capacity }} pessoas</span>
+      </p>
+      <p>
+        <b>Localização: </b>
+        <span>{{ board.localization }}</span>
+      </p>
+    </div>
+  </li>
+</ol>

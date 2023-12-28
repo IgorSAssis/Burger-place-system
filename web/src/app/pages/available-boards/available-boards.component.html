@@ -1,0 +1,36 @@
+<aside>
+  <app-filter-block
+    [title]="'Capacidade'"
+    [groupName]="'capacity-radio-group'"
+    [inputType]="'radio'"
+    [items]="capacityFilterItems"
+  />
+
+  <app-filter-block
+    [title]="'Localização'"
+    [inputType]="'checkbox'"
+    [items]="localizationFilterItems"
+  />
+
+  <app-filter-block
+    [title]="'Situação'"
+    [groupName]="'situation-radio-group'"
+    [inputType]="'radio'"
+    [items]="statusFilterItems"
+  />
+</aside>
+
+<div class="available-boards-container">
+  <app-breadcrumb [currentURI]="'Mesas disponíveis'" />
+
+  <div class="legends">
+    <p>Livre</p>
+    <p>Ocupada</p>
+  </div>
+
+  <div class="container">
+    <h1>Mesas disponíveis</h1>
+
+    <app-board-list [boards]="boards" />
+  </div>
+</div>

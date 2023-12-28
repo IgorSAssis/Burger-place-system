@@ -1,0 +1,17 @@
+header {
+  border-bottom: 1px solid var(--gray-border);
+  background-color: var(--white);
+  padding: 10px 14px;
+}
+
+header a {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 10px;  
+}
+
+header a span {
+  color: var(--gray-var-1);
+  font-size: 2rem;
+}

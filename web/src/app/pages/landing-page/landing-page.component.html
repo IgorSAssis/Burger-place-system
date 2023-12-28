@@ -1,0 +1,40 @@
+<app-svg-image
+  [path]="'../../assets/logo.svg'"
+  [width]="'260px'"
+  [height]="'260px'"
+  [color]="'var(--gray-var-1)'"
+/>
+<h1>Bem vindo ao Burguer Place App</h1>
+<p>As seguintes funções podem ser acessadas</p>
+<div>
+  <a
+    [routerLink]="['/available-boards']"
+    title="Acessar as mesas disponíveis para ocupação"
+  >
+    <app-svg-image
+      [path]="'../../assets/available-boards-icon.svg'"
+      [width]="'40px'"
+      [height]="'40px'"
+      [color]="'var(--white)'"
+    />
+    Mesas disponíveis
+  </a>
+  <a href="#" title="Acessar a cozinha">
+    <app-svg-image
+      [path]="'../../assets/kitchen-icon.svg'"
+      [width]="'42px'"
+      [height]="'42px'"
+      [color]="'var(--white)'"
+    />
+    Cozinha
+  </a>
+  <a href="#" title="Acessar a área do cliente">
+    <app-svg-image
+      [path]="'../../assets/customer-icon.svg'"
+      [width]="'30px'"
+      [height]="'30px'"
+      [color]="'var(--white)'"
+    />
+    Cliente
+  </a>
+</div>

@@ -1,13 +1,13 @@
-INSERT INTO boards(capacity, number, location) VALUES
-(2, 1, 'Interno'),
-(2, 2, 'Interno'),
-(2, 3, 'Interno'),
-(2, 4, 'Interno'),
-(4, 5, 'Interno'),
-(4, 6, 'Interno'),
-(8, 7, 'Interno'),
-(2, 8, 'Externa'),
-(2, 9, 'Externa'),
-(2, 10, 'Externa'),
-(2, 11, 'Externa'),
-(4, 12, 'Externa');
+INSERT INTO boards(capacity, number, location, active) VALUES
+(2, 1, 'AREA_INTERNA', true),
+(2, 2, 'AREA_INTERNA', true),
+(2, 3, 'AREA_INTERNA', true),
+(2, 4, 'AREA_INTERNA', true),
+(4, 5, 'AREA_INTERNA', true),
+(4, 6, 'AREA_INTERNA', true),
+(8, 7, 'AREA_INTERNA', true),
+(2, 8, 'TERRACO', true),
+(2, 9, 'TERRACO', true),
+(2, 10, 'VARANDA', true),
+(2, 11, 'VARANDA', true),
+(4, 12, 'VARANDA', true);
