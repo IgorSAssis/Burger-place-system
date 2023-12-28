@@ -9,6 +9,11 @@ ol li {
   flex-direction: column;
   border-radius: 10px;
   overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+ol li:hover {
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
 }
 
 ol li > div:first-child {
