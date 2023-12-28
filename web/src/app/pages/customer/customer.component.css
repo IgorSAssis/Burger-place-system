@@ -1,0 +1,195 @@
+:host {
+  display: flex;
+  height: 100%;
+}
+
+.customers-page-container {
+  flex: 6;
+  padding: 38px;
+  overflow: scroll;
+}
+
+.customers-page-container .menu {
+  margin: 26px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.customers-page-container .menu li button {
+  border: 1px solid var(--gray-border-v2);
+  border-radius: 6px;
+  background-color: var(--white);
+  padding: 14px 20px;
+  font-size: 1.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--gray-font);
+  transition: 0.2s;
+}
+
+.customers-page-container .menu li button:hover {
+  background-color: #f5f5f5;
+}
+
+.customers-page-container .menu li button.active {
+  border-color: var(--blue);
+  background-color: var(--blue);
+  color: var(--white);
+}
+
+.customers-page-container .menu li button.active:hover {
+  background-color: var(--blue-hover);
+}
+
+.customers-page-container .products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.customers-page-container .products li {
+  background-color: var(--white);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.customers-page-container .products li:hover {
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+.customers-page-container .products li img {
+  height: 200px;
+}
+
+.customers-page-container .products li div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.customers-page-container .products li div strong {
+  color: var(--gray-font-var-2);
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.customers-page-container .products li div p {
+  color: var(--gray-font-var-3);
+  font-size: 1.4rem;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.customers-page-container .products li > p {
+  width: 100%;
+  background-color: var(--red);
+  color: var(--white);
+  font-size: 1.6rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 6px 0;
+}
+
+aside {
+  flex: 1;
+  background-color: var(--white);
+  border-left: 1px solid var(--gray-border);
+  overflow: scroll;
+  position: relative;
+}
+
+aside .item {
+  border-bottom: 1px solid var(--gray-border);
+}
+
+aside .item button {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  color: var(--gray-font);
+  padding: 20px 20px 20px 12px;
+  text-align: left;
+
+  display: flex;
+  align-items: center;
+}
+
+aside .item button:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  transition: 0.2s;
+}
+
+aside .item .expandable {
+  padding: 0 20px;
+  max-height: 0;
+  overflow: scroll;
+  transition: max-height 0.4s;
+}
+
+aside .item .expandable ul {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+aside .item .expandable ul li {
+  position: relative;
+}
+
+aside .item .expandable ul li:first-child {
+  margin-top: 15px;
+}
+
+aside .item .expandable ul li:last-child {
+  margin-bottom: 15px;
+}
+
+aside .item .expandable ul li:not(:last-child)::after {
+  content: "• • •";
+  color: var(--gray-var-1);
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+aside .item .expandable ul li p {
+  color: var(--gray-font);
+  font-weight: 400;
+}
+
+aside .item .expandable ul li p b {
+  color: var(--gray-var-1);
+}
+
+aside .item .expandable.expanded {
+  max-height: 300px;
+}
+
+aside .total-cost {
+  width: 100%;
+  padding: 0 30px;
+  position: absolute;
+  bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+aside .total-cost span {
+  font-size: 1.8rem;
+}
+
+aside .total-cost b {
+  font-size: 1.8rem;
+  color: var(--green);
+}

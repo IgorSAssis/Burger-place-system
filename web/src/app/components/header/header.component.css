@@ -1,4 +1,5 @@
 header {
+  height: 8%;
   border-bottom: 1px solid var(--gray-border);
   background-color: var(--white);
   padding: 10px 14px;

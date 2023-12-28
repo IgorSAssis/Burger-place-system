@@ -47,6 +47,6 @@ div a {
 }
 
 div a:hover {
-  background-color: #294a88;
+  background-color: var(--blue-hover);
   transition: 0.2s ease;
 }

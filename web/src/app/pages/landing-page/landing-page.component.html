@@ -19,7 +19,7 @@
     />
     Mesas disponíveis
   </a>
-  <a href="#" title="Acessar a cozinha">
+  <a title="Acessar a cozinha">
     <app-svg-image
       [path]="'../../assets/kitchen-icon.svg'"
       [width]="'42px'"
@@ -28,7 +28,7 @@
     />
     Cozinha
   </a>
-  <a href="#" title="Acessar a área do cliente">
+  <a [routerLink]="['/customers']" href="#" title="Acessar a área do cliente">
     <app-svg-image
       [path]="'../../assets/customer-icon.svg'"
       [width]="'30px'"

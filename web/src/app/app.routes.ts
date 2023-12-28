@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AvailableBoardsComponent } from './pages/available-boards/available-boards.component';
 import { LandingPageComponent } from './pages/landing-page/landing-page.component';
+import { CustomerComponent } from './pages/customer/customer.component';
 
 export const routes: Routes = [
   {
@@ -12,5 +13,10 @@ export const routes: Routes = [
     path: 'available-boards',
     component: AvailableBoardsComponent,
     title: 'Available boards page',
+  },
+  {
+    path: 'customers',
+    component: CustomerComponent,
+    title: 'Customer area',
   },
 ];

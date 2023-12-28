@@ -1,8 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
-
 :root {
   --background: #f3f3f3;
   --blue: #315cae;
+  --blue-hover: #294a88;
   --red: #e25d5d;
   --green: #3cca39;
   --black: #000;
@@ -10,7 +9,10 @@
   --gray-var-1: #606060;
   --gray-var-2: #a9b4b9;
   --gray-border: #c6c6c6;
+  --gray-border-v2: #dddddd;
   --gray-font: #7e7e7e;
+  --gray-font-var-2: #616161;
+  --gray-font-var-3: #8d8d8d;
 }
 
 * {
@@ -37,6 +39,7 @@ a {
   text-decoration: none;
 }
 
-ul, ol {
+ul,
+ol {
   list-style-type: none;
 }
