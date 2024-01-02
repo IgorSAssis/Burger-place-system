@@ -1,246 +1,208 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { FilterBlockComponent } from '../../components/filter-block/filter-block.component';
-import { FilterItems } from '../../components/filter-block/filter-items';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import {
+  Board,
+  BoardLocation,
+  BoardLocationType,
+  BoardService,
+  CapacityFilter,
+  FetchBoardsFilters,
+  LocationFilter,
+} from '../../services/board.service';
+
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
-import { BoardListComponent } from '../../components/board-list/board-list.component';
-import { Board } from '../../components/board-list/board';
+import { SvgImageComponent } from '../../components/svg-image/svg-image.component';
+import { ModalService } from '../../services/modal.service';
+import {
+  CreateOccupationDTO,
+  OccupationService,
+} from '../../services/occupation.service';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 
 @Component({
   selector: 'app-available-boards',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
-    FilterBlockComponent,
     BreadcrumbComponent,
-    BoardListComponent,
+    SvgImageComponent,
+    FormsModule,
+    PaginationComponent,
   ],
   templateUrl: './available-boards.component.html',
   styleUrl: './available-boards.component.css',
 })
-export class AvailableBoardsComponent {
-  private _capacityFilterItems: FilterItems[] = [
-    { id: 'capacity-01', text: '2 pessoas' },
-    { id: 'capacity-02', text: '4 pessoas' },
-    { id: 'capacity-03', text: '8 pessoas' },
-    { id: 'capacity-04', text: '10 pessoas' },
-    { id: 'capacity-05', text: '+10 pessoas' },
-  ];
-  private _localizationFilterItems: FilterItems[] = [
-    { id: 'VARANDA', text: 'Varanda' },
-    { id: 'SACADA', text: 'Sacada' },
-    { id: 'TERRACO', text: 'Terraço' },
-    { id: 'AREA_INTERNA', text: 'Area interna' },
-  ];
-  private _statusFilterItems: FilterItems[] = [
-    { id: 'situation-opt-1', text: 'Ocupada' },
-    { id: 'situation-opt-2', text: 'Livre' },
-  ];
-  private _boards: Board[] = [
-    {
-      id: 1,
-      boardNumber: 1,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: true,
-    },
-    {
-      id: 2,
-      boardNumber: 2,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 3,
-      boardNumber: 3,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 4,
-      boardNumber: 4,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 5,
-      boardNumber: 5,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 6,
-      boardNumber: 6,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 7,
-      boardNumber: 7,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 8,
-      boardNumber: 8,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 9,
-      boardNumber: 9,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 1,
-      boardNumber: 1,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: true,
-    },
-    {
-      id: 2,
-      boardNumber: 2,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 3,
-      boardNumber: 3,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 4,
-      boardNumber: 4,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 5,
-      boardNumber: 5,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 6,
-      boardNumber: 6,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 7,
-      boardNumber: 7,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 8,
-      boardNumber: 8,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 9,
-      boardNumber: 9,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 1,
-      boardNumber: 1,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: true,
-    },
-    {
-      id: 2,
-      boardNumber: 2,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 3,
-      boardNumber: 3,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 4,
-      boardNumber: 4,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 5,
-      boardNumber: 5,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 6,
-      boardNumber: 6,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 7,
-      boardNumber: 7,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 8,
-      boardNumber: 8,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-    {
-      id: 9,
-      boardNumber: 9,
-      capacity: 2,
-      localization: 'Area interna',
-      occupied: false,
-    },
-  ];
+export class AvailableBoardsComponent implements OnInit {
+  private occupationService: OccupationService = inject(OccupationService);
+  private boardService: BoardService = inject(BoardService);
+  private modalService: ModalService = inject(ModalService);
+  private router: Router = inject(Router);
+
+  private _capacityFilterItems: CapacityFilter[];
+  private _locationFilterItems: LocationFilter[];
+
+  private _boards: Board[];
+  private _activeLocationFilterId: BoardLocationType | null;
+  private _activeCapacityFilter: number | null;
+  private _totalPages: number;
+  private _currentPage: number;
+
+  constructor() {
+    this._currentPage = 0;
+    this._totalPages = 0;
+    this._boards = [];
+    this._activeCapacityFilter = null;
+    this._activeLocationFilterId = null;
+    this._locationFilterItems = this.boardService.getAvailableLocationFilters();
+    this._capacityFilterItems = this.boardService.getAvailableCapacityFilters();
+  }
+
+  ngOnInit(): void {
+    this.fetchBoards();
+  }
 
   public get capacityFilterItems() {
     return this._capacityFilterItems;
   }
 
-  public get localizationFilterItems() {
-    return this._localizationFilterItems;
-  }
-
-  public get statusFilterItems() {
-    return this._statusFilterItems;
+  public get locationFilterItems() {
+    return this._locationFilterItems;
   }
 
   public get boards() {
     return this._boards;
+  }
+
+  public get activeCapacityFilterValue() {
+    return this._activeCapacityFilter;
+  }
+
+  public set activeCapacityFilterValue(capacity: number | null) {
+    this._activeCapacityFilter = capacity;
+  }
+
+  public get activeLocationFilterId() {
+    return this._activeLocationFilterId;
+  }
+
+  public set activeLocationFilterId(id: BoardLocationType | null) {
+    this._activeLocationFilterId = id;
+  }
+
+  public get totalPages() {
+    return this._totalPages;
+  }
+
+  resetFilters() {
+    this._activeCapacityFilter = null;
+    this._activeLocationFilterId = null;
+    this.fetchBoards();
+  }
+
+  applyFilters() {
+    this.fetchBoards();
+  }
+
+  activateCapacityFilter(capacity: number) {
+    this._activeCapacityFilter = capacity;
+  }
+
+  activateLocationFilter(id: string) {
+    if (id in BoardLocation) {
+      this._activeLocationFilterId = id as BoardLocationType;
+    }
+  }
+
+  getBoardLocationText(type: BoardLocationType) {
+    return BoardLocation[type];
+  }
+
+  onSelectBoard(board: Board) {
+    console.log(board);
+    this.modalService.openCreateOccupationModal().subscribe({
+      next: (peopleCount) => {
+        this.createOccupation(board.id, peopleCount);
+      },
+    });
+  }
+
+  changeCurrentPage(page: number) {
+    this._currentPage = page;
+    this.fetchBoards();
+  }
+
+  private fetchBoards() {
+    const options: FetchBoardsFilters = {
+      page: this._currentPage,
+    };
+
+    if (this._activeCapacityFilter) {
+      options.capacity = this._activeCapacityFilter;
+    }
+
+    if (this._activeLocationFilterId) {
+      options.location = this._activeLocationFilterId;
+    }
+
+    this.boardService.fetchBoards(options).subscribe({
+      next: (data) => {
+        console.log(data.boards);
+        this._boards = data.boards;
+        this._totalPages = data.totalPages;
+      },
+      error: (error) => console.error(error),
+      complete: () => console.log('Successfull'),
+    });
+  }
+
+  private createOccupation(boardId: number, peopleCount: number) {
+    if (peopleCount <= 0) {
+      return alert('A quantidade de pessoas deve ser maior ou igual a 1');
+    }
+
+    const beginOccupation = new Date();
+    beginOccupation.setSeconds(beginOccupation.getSeconds() - 1);
+
+    const formattedBeginOccupationDate = `${beginOccupation.getFullYear()}-${(
+      beginOccupation.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}-${beginOccupation
+      .getDate()
+      .toString()
+      .padStart(2, '0')}T${beginOccupation
+      .getHours()
+      .toString()
+      .padStart(2, '0')}:${beginOccupation
+      .getMinutes()
+      .toString()
+      .padStart(2, '0')}:${beginOccupation
+      .getSeconds()
+      .toString()
+      .padStart(2, '0')}`;
+
+    console.log(formattedBeginOccupationDate);
+
+    const createOccupationDTO: CreateOccupationDTO = {
+      beginOccupation: formattedBeginOccupationDate,
+      boardId,
+      peopleCount,
+    };
+
+    this.occupationService.createOccupation(createOccupationDTO).subscribe({
+      next: (occupationId) => {
+        console.log(occupationId);
+        this.fetchBoards();
+        this.modalService.closeModal();
+        this.router.navigate([`customers/${occupationId}`]);
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
   }
 }

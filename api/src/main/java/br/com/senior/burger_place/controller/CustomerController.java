@@ -1,10 +1,10 @@
 package br.com.senior.burger_place.controller;
 
 import br.com.senior.burger_place.domain.customer.Customer;
-import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationData;
+import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
 import br.com.senior.burger_place.domain.customer.CustomerService;
-import br.com.senior.burger_place.domain.customer.dto.CustomerUploadData;
-import br.com.senior.burger_place.domain.customer.dto.listingDataCustomers;
+import br.com.senior.burger_place.domain.customer.dto.CustomerUpdatedDTO;
+import br.com.senior.burger_place.domain.customer.dto.ListingCustomersDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("customers")
@@ -24,20 +25,23 @@ public class CustomerController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<Object> register(@RequestBody @Valid CustomerRegistrationData data) {
-        Customer customer = customerService.addCustomer(data);
-        return ResponseEntity.status(HttpStatus.OK).body(customer);
+    public ResponseEntity<Object> register(@RequestBody @Valid CustomerRegistrationDTO dto, UriComponentsBuilder uriBuilder) {
+        Customer customer = customerService.addCustomer(dto);
+        var uri = uriBuilder.path("/customers/{id}").buildAndExpand(customer.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new ListingCustomersDTO(customer));
     }
 
     @GetMapping
-    public Page<listingDataCustomers> listCustomer(@PageableDefault(size = 5, sort = {"name"}) Pageable pageable) {
-        return customerService.listCustomer(pageable);
+    public ResponseEntity<Page<ListingCustomersDTO>> listAllCustomer(@PageableDefault(size = 5, sort = {"name"}) Pageable pageable) {
+        Page<ListingCustomersDTO> customers = customerService.listCustomer(pageable);
+        return ResponseEntity.ok().body(customers);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> listCustomerById(@PathVariable Long id) {
         Customer customer = customerService.listCustomerById(id);
-        return ResponseEntity.ok(new listingDataCustomers(customer));
+        return ResponseEntity.ok(new ListingCustomersDTO(customer));
     }
 
     @PutMapping("/{id}")
@@ -47,10 +51,12 @@ public class CustomerController {
             Long id,
             @RequestBody
             @Valid
-            CustomerUploadData data
+            CustomerUpdatedDTO dto
     ) {
-        customerService.updateCustomer(id, data);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(data);
+        customerService.updateCustomer(id, dto);
+        Customer customer = customerService.listCustomerById(id);
+        ListingCustomersDTO updatedData = new ListingCustomersDTO((customer));
+        return ResponseEntity.status(HttpStatus.OK).body(updatedData);
     }
 
     @DeleteMapping("/{id}")

@@ -1,23 +1,47 @@
 <aside>
-  <app-filter-block
-    [title]="'Capacidade'"
-    [groupName]="'capacity-radio-group'"
-    [inputType]="'radio'"
-    [items]="capacityFilterItems"
-  />
+  <div class="filter-block">
+    <b>Capacidade</b>
 
-  <app-filter-block
-    [title]="'Localização'"
-    [inputType]="'checkbox'"
-    [items]="localizationFilterItems"
-  />
+    <ul>
+      <li *ngFor="let item of capacityFilterItems">
+        <input
+          type="radio"
+          name="capacity-radio-group"
+          [id]="'capacity-'.concat(item.capacity.toString())"
+          (click)="activateCapacityFilter(item.capacity)"
+          [(ngModel)]="activeCapacityFilterValue"
+          [value]="item.capacity"
+        />
+        <label [for]="'capacity-'.concat(item.capacity.toString())">{{
+          item.text
+        }}</label>
+      </li>
+    </ul>
+  </div>
 
-  <app-filter-block
-    [title]="'Situação'"
-    [groupName]="'situation-radio-group'"
-    [inputType]="'radio'"
-    [items]="statusFilterItems"
-  />
+  <div class="filter-block">
+    <b>Localização</b>
+
+    <ul>
+      <li *ngFor="let item of locationFilterItems">
+        <input
+          type="radio"
+          name="localization-radio-group"
+          [id]="item[0]"
+          (click)="activateLocationFilter(item[0])"
+          [(ngModel)]="activeLocationFilterId"
+          [value]="item[0]"
+        />
+        <label for="{{ item[0] }}">{{ item[1] }}</label>
+      </li>
+    </ul>
+  </div>
+
+  <button class="apply-filters" (click)="applyFilters()">
+    Aplicar filtros
+  </button>
+
+  <button class="clean-filters" (click)="resetFilters()">Limpar filtros</button>
 </aside>
 
 <div class="available-boards-container">
@@ -31,6 +55,41 @@
   <div class="container">
     <h1>Mesas disponíveis</h1>
 
-    <app-board-list [boards]="boards" />
+    <div id="empty-list-message" *ngIf="boards.length === 0">
+      <app-svg-image
+        [path]="'../../../assets/empty-list-icon.svg'"
+        [width]="'180px'"
+        [height]="'180px'"
+        [color]="'var(--gray-font-var-3)'"
+      />
+      <b>Nenhuma mesa disponível!</b>
+    </div>
+
+    <ol *ngIf="boards.length > 0">
+      <li *ngFor="let board of boards" (click)="onSelectBoard(board)">
+        <div [class.available]="!board.occupied">
+          <span>nº</span>
+          <b>{{ board.number | number : "2.0" }}</b>
+        </div>
+
+        <div>
+          <p>
+            <b>Capacidade: </b>
+            <span>{{ board.capacity }} pessoas</span>
+          </p>
+          <p>
+            <b>Localização: </b>
+            <span>{{ getBoardLocationText(board.location) }}</span>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="pagination">
+      <app-pagination
+        (activePageEvent)="changeCurrentPage($event)"
+        [totalPages]="totalPages"
+      />
+    </div>
   </div>
 </div>

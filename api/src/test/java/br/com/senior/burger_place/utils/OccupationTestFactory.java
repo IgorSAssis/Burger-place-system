@@ -3,7 +3,7 @@ package br.com.senior.burger_place.utils;
 import br.com.senior.burger_place.domain.board.Board;
 import br.com.senior.burger_place.domain.customer.Customer;
 import br.com.senior.burger_place.domain.occupation.Occupation;
-import br.com.senior.burger_place.domain.occupation.OrderItem;
+import br.com.senior.burger_place.domain.orderItem.OrderItem;
 import br.com.senior.burger_place.domain.occupation.PaymentForm;
 
 import java.time.LocalDateTime;

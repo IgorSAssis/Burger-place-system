@@ -16,9 +16,10 @@ export const routes: Routes = [
     title: 'Available boards page',
   },
   {
-    path: 'customers',
+    path: 'customers/:occupationId',
     component: CustomerComponent,
     title: 'Customer area',
+
   },
   {
     path: 'kitchen',

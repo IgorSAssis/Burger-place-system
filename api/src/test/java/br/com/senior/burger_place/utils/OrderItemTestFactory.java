@@ -1,8 +1,8 @@
 package br.com.senior.burger_place.utils;
 
 import br.com.senior.burger_place.domain.occupation.Occupation;
-import br.com.senior.burger_place.domain.occupation.OrderItem;
-import br.com.senior.burger_place.domain.occupation.OrderItemStatus;
+import br.com.senior.burger_place.domain.orderItem.OrderItem;
+import br.com.senior.burger_place.domain.orderItem.OrderItemStatus;
 import br.com.senior.burger_place.domain.product.Product;
 
 public class OrderItemTestFactory {
@@ -16,9 +16,9 @@ public class OrderItemTestFactory {
                 amount,
                 20.3,
                 OrderItemStatus.RECEBIDO,
-                null,
-                new Product(),
-                new Occupation(),
+                "Sem tomate",
+                ProductTestFactory.productFactory(1L),
+                OccupationTestFactory.openedOccupationFactory(1L),
                 true
         );
     }

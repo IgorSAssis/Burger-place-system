@@ -1,5 +1,6 @@
 package br.com.senior.burger_place.controller;
 
+import br.com.senior.burger_place.domain.product.ProductCategory;
 import br.com.senior.burger_place.domain.product.ProductService;
 import br.com.senior.burger_place.domain.product.dto.CreateProductDTO;
 import br.com.senior.burger_place.domain.product.dto.ProductDTO;
@@ -24,8 +25,12 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> listProducts(Pageable pageable) {
-        return ResponseEntity.ok(this.productService.listProducts(pageable));
+    public ResponseEntity<Page<ProductDTO>> listProducts(
+            Pageable pageable,
+            @RequestParam(name = "category", required = false)
+            ProductCategory category
+    ) {
+        return ResponseEntity.ok(this.productService.listProducts(pageable, category));
     }
 
     @GetMapping("/{id}")

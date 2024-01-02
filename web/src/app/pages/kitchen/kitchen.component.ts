@@ -1,150 +1,158 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import {
+  OrderItemListing,
+  OrderItemService,
+  OrderItemStatusType,
+} from '../../services/order-item.service';
+
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { SvgImageComponent } from '../../components/svg-image/svg-image.component';
-import { KitchenCardListComponent } from '../../components/kitchen-card-list/kitchen-card-list.component';
-import { KitchenCard } from '../../components/kitchen-card-list/kitchen-card';
+
+import { StringPaddingPipe } from '../../pipes/string-padding.pipe';
 
 @Component({
   selector: 'app-kitchen',
   standalone: true,
-  imports: [BreadcrumbComponent, SvgImageComponent, KitchenCardListComponent],
+  imports: [
+    CommonModule,
+    BreadcrumbComponent,
+    SvgImageComponent,
+    StringPaddingPipe,
+  ],
   templateUrl: './kitchen.component.html',
   styleUrl: './kitchen.component.css',
 })
-export class KitchenComponent {
-  private _inProgressCards: KitchenCard[] = [
-    {
-      cardId: 1,
-      items: [
-        {
-          id: 1,
-          amount: 2,
-          name: 'Duas carnes',
-          description:
-            'Hamburguer duplo de alcatra, tomate, alface, queijo mussarela, queijo cheddar',
-          observation: 'sem maionese',
-        },
-        {
-          id: 2,
-          amount: 2,
-          name: 'Porção de batata frita',
-        },
-      ],
-      boardNumber: 14,
-      openedAt: '14:00',
-      type: 'IN_PROGRESS',
-    },
-    {
-      cardId: 2,
-      items: [
-        {
-          id: 3,
-          amount: 2,
-          name: 'Duas carnes',
-          description:
-            'Hamburguer duplo de alcatra, tomate, alface, queijo mussarela, queijo cheddar',
-        },
-        {
-          id: 4,
-          amount: 2,
-          name: 'Porção de batata frita',
-        },
-      ],
-      boardNumber: 17,
-      openedAt: '13:00',
-      type: 'IN_PROGRESS',
-    },
-    {
-      cardId: 3,
-      items: [
-        {
-          id: 5,
-          amount: 2,
-          name: 'Duas carnes',
-          description:
-            'Hamburguer duplo de alcatra, tomate, alface, queijo mussarela, queijo cheddar',
-        },
-        {
-          id: 6,
-          amount: 2,
-          name: 'Porção de batata frita',
-        },
-      ],
-      boardNumber: 17,
-      openedAt: '15:00',
-      type: 'IN_PROGRESS',
-    },
-    {
-      cardId: 4,
-      items: [
-        {
-          id: 7,
-          amount: 2,
-          name: 'Duas carnes',
-          description:
-            'Hamburguer duplo de alcatra, tomate, alface, queijo mussarela, queijo cheddar',
-        },
-        {
-          id: 8,
-          amount: 2,
-          name: 'Porção de batata frita',
-        },
-      ],
-      boardNumber: 10,
-      openedAt: '11:00',
-      type: 'IN_PROGRESS',
-    },
-  ];
+export class KitchenComponent implements OnInit {
+  private orderItemService: OrderItemService = inject(OrderItemService);
 
-  private _toDoCards: KitchenCard[] = [
-    {
-      cardId: 5,
-      items: [
-        {
-          id: 11,
-          amount: 2,
-          name: 'Duas carnes',
-          description:
-            'Hamburguer duplo de alcatra, tomate, alface, queijo mussarela, queijo cheddar',
-          observation: 'sem maionese',
-        },
-        {
-          id: 12,
-          amount: 2,
-          name: 'Porção de batata frita',
-        },
-      ],
-      boardNumber: 20,
-      openedAt: '14:00',
-      type: 'TO_DO',
-    },
-    {
-      cardId: 6,
-      items: [
-        {
-          id: 13,
-          amount: 2,
-          name: 'Duas carnes',
-          description:
-            'Hamburguer duplo de alcatra, tomate, alface, queijo mussarela, queijo cheddar',
-        },
-        {
-          id: 14,
-          amount: 2,
-          name: 'Porção de batata frita',
-        },
-      ],
-      boardNumber: 21,
-      openedAt: '13:00',
-      type: 'TO_DO',
-    },
-  ];
+  private _readyDeliverOrderItems: OrderItemListing;
+  private _inProgressOrderItems: OrderItemListing;
+  private _pendingOrderItems: OrderItemListing;
+  private _canceledOrderItems: OrderItemListing;
 
-  public get inProgressCards() {
-    return this._inProgressCards;
+  private _expandedSections: boolean[];
+
+  constructor() {
+    this._expandedSections = [true, true, true, true];
+    this._readyDeliverOrderItems = { orderItems: [], totalElements: 0 };
+    this._inProgressOrderItems = { orderItems: [], totalElements: 0 };
+    this._pendingOrderItems = { orderItems: [], totalElements: 0 };
+    this._canceledOrderItems = { orderItems: [], totalElements: 0 };
   }
 
-  public get todoCards() {
-    return this._toDoCards;
+  public get inProgressOrderItems() {
+    return this._inProgressOrderItems;
+  }
+
+  public get pendingOrderItems() {
+    return this._pendingOrderItems;
+  }
+
+  public get readyDeliverOrderItems() {
+    return this._readyDeliverOrderItems;
+  }
+
+  public get canceledOrderItems() {
+    return this._canceledOrderItems;
+  }
+
+  public get expandedSections() {
+    return this._expandedSections;
+  }
+
+  ngOnInit(): void {
+    this.fetchReadyToDeliverOrderItems();
+    this.fetchInProgressOrderItems();
+    this.fetchPendingOrderItems();
+    this.fetchCanceledOrderItems();
+  }
+
+  deliverOrderItem(itemId: number, occupationId: number) {
+    this.orderItemService.deliverOrderItem(itemId, occupationId).subscribe({
+      next: () => {
+        this.fetchReadyToDeliverOrderItems();
+      },
+      error: (error) => {
+        console.log(error);
+      },
+      complete: () => {
+        console.log('Successfull');
+      },
+    });
+  }
+
+  finishOrderItem(itemId: number, occupationId: number) {
+    this.orderItemService
+      .finishPreparationOrderItem(itemId, occupationId)
+      .subscribe({
+        next: () => {
+          this.fetchReadyToDeliverOrderItems();
+          this.fetchInProgressOrderItems();
+        },
+        error: (error) => {
+          console.log(error);
+        },
+        complete: () => {
+          console.log('Successfull');
+        },
+      });
+  }
+
+  startOrderItem(itemId: number, occupationId: number) {
+    this.orderItemService
+      .startPreparationOrderItem(itemId, occupationId)
+      .subscribe({
+        next: () => {
+          this.fetchPendingOrderItems();
+          this.fetchInProgressOrderItems();
+        },
+        error: (error) => {
+          console.log(error);
+        },
+        complete: () => {
+          console.log('Successfull');
+        },
+      });
+  }
+
+  toggleOrderItemSection(index: number) {
+    this._expandedSections[index] = !this._expandedSections[index];
+  }
+
+  private fetchOrderItems(
+    status: OrderItemStatusType,
+    nextCallback: (data: OrderItemListing) => void
+  ) {
+    this.orderItemService.fetchOrderItems(status).subscribe({
+      next: nextCallback,
+      error: (error) => console.error(error),
+      complete: () => console.log('Successfull'),
+    });
+  }
+
+  private fetchInProgressOrderItems() {
+    this.fetchOrderItems('EM_ANDAMENTO', (data) => {
+      this._inProgressOrderItems = data;
+    });
+  }
+
+  private fetchPendingOrderItems() {
+    this.fetchOrderItems('RECEBIDO', (data) => {
+      this._pendingOrderItems = data;
+    });
+  }
+
+  private fetchReadyToDeliverOrderItems() {
+    this.fetchOrderItems('PRONTO', (data) => {
+      this._readyDeliverOrderItems = data;
+    });
+  }
+
+  private fetchCanceledOrderItems() {
+    this.fetchOrderItems('CANCELADO', (data) => {
+      this._canceledOrderItems = data;
+    });
   }
 }

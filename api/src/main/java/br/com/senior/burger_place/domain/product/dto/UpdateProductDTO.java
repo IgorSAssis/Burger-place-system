@@ -1,15 +1,16 @@
 package br.com.senior.burger_place.domain.product.dto;
 
+import br.com.senior.burger_place.domain.product.ProductCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record UpdateProductDTO(
-        @NotBlank
         String name,
-        @NotNull
+        String ingredients,
         @Positive
         Double price,
-        String description
+        ProductCategory category,
+        String url
 ) {
 }

@@ -1,0 +1,13 @@
+<div class="container">
+  <h2>Editar item do pedido</h2>
+  <button class="cancel-order-item" (click)="doAction('CANCEL')">
+    Cancelar item
+  </button>
+  <button
+    *ngIf="showEditOrderItemButton"
+    class="edit-order-item"
+    (click)="doAction('EDIT')"
+  >
+    Editar item item
+  </button>
+</div>

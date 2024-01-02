@@ -1,16 +1,19 @@
 package br.com.senior.burger_place.domain.customer;
 
 import br.com.senior.burger_place.domain.address.Address;
-import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationData;
-import br.com.senior.burger_place.domain.customer.dto.CustomerUploadData;
+import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
+import br.com.senior.burger_place.domain.customer.dto.CustomerUpdatedDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Table(name = "customers")
 @Entity(name = "Customer")
 public class Customer {
@@ -23,7 +26,7 @@ public class Customer {
         private boolean active;
         @Embedded
         private Address address;
-        public Customer(CustomerRegistrationData data) {
+        public Customer(CustomerRegistrationDTO data) {
                 this.active = true;
                 this.name = data.name();
                 this.email = data.email();
@@ -31,18 +34,20 @@ public class Customer {
                 this.address = new Address(data.address());
         }
 
-        public void updateInformation(CustomerUploadData data) {
+        public void updateInformation(CustomerUpdatedDTO data) {
+                if (data.name() == null && data.email() == null && data.adressDto() == null){
+                        throw new IllegalArgumentException("Para poder atualizar um cliente, é necessário informar ao menos um dado válido");
+                }
                 if (data.name() != null){
                         this.name = data.name();
                 }
                 if (data.email() != null){
                         this.email = data.email();
                 }
-                if (data.adressData() != null){
-                        this.address.updateInformation(data.adressData());
+                if (data.adressDto() != null){
+                        this.address.updateInformationAdress(data.adressDto());
                 }
         }
-
         public void inactivate() {
                 this.active = false;
         }

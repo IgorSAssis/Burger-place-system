@@ -1,0 +1,35 @@
+<button (click)="prevPage()">
+  <app-svg-image
+    [path]="'../../../assets/arrow.svg'"
+    [width]="'32px'"
+    [height]="'32px'"
+    [color]="'var(--gray-font)'"
+  />
+</button>
+
+<ol>
+  <li>
+    <button *ngIf="!isFirstWindow() && totalPages > 0" (click)="firstWindow()">
+      ...
+    </button>
+  </li>
+  <li *ngFor="let page of pages">
+    <button (click)="activatePage(page)" [class.active]="isPageActive(page)">
+      {{ page }}
+    </button>
+  </li>
+  <li>
+    <button *ngIf="!isLastWindow() && totalPages > 0" (click)="lastWindow()">
+      ...
+    </button>
+  </li>
+</ol>
+
+<button (click)="nextPage()">
+  <app-svg-image
+    [path]="'../../../assets/arrow.svg'"
+    [width]="'32px'"
+    [height]="'32px'"
+    [color]="'var(--gray-font)'"
+  />
+</button>

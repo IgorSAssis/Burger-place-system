@@ -1,0 +1,30 @@
+<div class="container">
+  <h2>
+    {{ type === "CREATE" ? "Adicionar novo item" : "Atualizar item" }}
+  </h2>
+  <div class="input-block">
+    <label for="item-amount">
+      {{
+        type === "CREATE"
+          ? "Quantos itens deseja adicionar?"
+          : "Quantidade de itens"
+      }}
+    </label>
+    <input type="number" id="item-amount" [(ngModel)]="itemAmount" />
+  </div>
+  <div class="input-block">
+    <label for="item-observation">
+      {{
+        type === "CREATE" ? "Deseja adicionar alguma observação?" : "Observação"
+      }}
+    </label>
+    <textarea
+      type="text"
+      id="item-observation"
+      [(ngModel)]="itemObservation"
+    ></textarea>
+  </div>
+  <button (click)="onClick()">
+    {{ type === "CREATE" ? "Adicionar item" : "Atualizar item" }}
+  </button>
+</div>

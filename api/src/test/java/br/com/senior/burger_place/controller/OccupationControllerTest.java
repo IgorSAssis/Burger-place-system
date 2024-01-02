@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @WebMvcTest(controllers = {OccupationController.class})
@@ -138,13 +139,34 @@ public class OccupationControllerTest {
 
         response
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(result -> {
-                    OccupationDTO responseResult = this.objectMapper.readValue(
-                            result.getResponse().getContentAsString(),
-                            OccupationDTO.class);
-
-                    Assertions.assertEquals(responseResult, someOccupationDTO);
-                })
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.id",
+                        CoreMatchers.is(someOccupationDTO.id()), Long.class)
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.beginOccupation",
+                        CoreMatchers.is(someOccupationDTO.beginOccupation().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.endOccupation",
+                        CoreMatchers.is(someOccupationDTO.endOccupation()))
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.paymentForm",
+                        CoreMatchers.is(someOccupationDTO.paymentForm()))
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.peopleCount",
+                        CoreMatchers.is(someOccupationDTO.peopleCount()))
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.board.number",
+                        CoreMatchers.is(someOccupationDTO.board().number()))
+                )
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.board.location",
+                        CoreMatchers.is(someOccupationDTO.board().location().name()))
+                )
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -467,7 +489,7 @@ public class OccupationControllerTest {
                 ))
                 .andExpect(MockMvcResultMatchers.jsonPath(
                         "$.beginOccupation",
-                        CoreMatchers.containsString(someBeginOccupation.toString())
+                        CoreMatchers.containsString(someBeginOccupation.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 ))
                 .andExpect(MockMvcResultMatchers.jsonPath(
                         "$.endOccupation",

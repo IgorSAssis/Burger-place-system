@@ -13,4 +13,6 @@ public interface OccupationRepository extends JpaRepository<Occupation, Long> {
     Page<Occupation> findAllByActiveTrue(Pageable pageable);
     Occupation getReferenceByIdAndActiveTrue(Long id);
     boolean existsByIdAndActiveTrue(Long id);
+
+    Occupation findFirstByBoardIdOrderByBeginOccupationDesc(Long boardId);
 }

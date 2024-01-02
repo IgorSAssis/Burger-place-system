@@ -53,6 +53,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 15px;
   overflow: hidden;
   cursor: pointer;
@@ -98,6 +99,13 @@
   padding: 6px 0;
 }
 
+.customers-page-container .pagination {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 aside {
   flex: 1;
   background-color: var(--white);
@@ -131,10 +139,16 @@ aside .item button:hover {
 }
 
 aside .item .expandable {
-  padding: 0 20px;
   max-height: 0;
   overflow: scroll;
   transition: max-height 0.4s;
+}
+
+aside .item .expandable .empty-item-message {
+  text-align: center;
+  padding: 20px 12px;
+  color: var(--gray-font);
+  font-weight: 500;
 }
 
 aside .item .expandable ul {
@@ -145,6 +159,15 @@ aside .item .expandable ul {
 
 aside .item .expandable ul li {
   position: relative;
+  padding: 14px 20px;
+}
+
+aside .item:nth-child(2) .expandable ul li {
+  cursor: pointer;
+}
+
+aside .item:nth-child(2) .expandable ul li:hover {
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 aside .item .expandable ul li:first-child {

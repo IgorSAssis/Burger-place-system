@@ -18,37 +18,37 @@ public class Address {
     private String residentialNumber;
     private String complement;
 
-    public Address(AdressData adressData) {
-        this.streetAddress = adressData.streetAddress();
-        this.neighborhood = adressData.neighborhood();
-        this.city = adressData.city();
-        this.state = adressData.state();
-        this.postalCode = adressData.postalCode();
-        this.residentialNumber = adressData.residentialNumber();
-        this.complement = adressData.complement();
+    public Address(AdressDto adressDto) {
+        this.streetAddress = adressDto.streetAddress();
+        this.neighborhood = adressDto.neighborhood();
+        this.city = adressDto.city();
+        this.state = adressDto.state();
+        this.postalCode = adressDto.postalCode();
+        this.residentialNumber = adressDto.residentialNumber();
+        this.complement = adressDto.complement();
     }
 
-    public void updateInformation(AdressData adressData) {
-        if (adressData.streetAddress() != null){
-            this.streetAddress = adressData.streetAddress();
+    public void updateInformationAdress(AdressDto adressDto) {
+        if (adressDto.streetAddress() != null){
+            this.streetAddress = adressDto.streetAddress();
         }
-        if (adressData.neighborhood() != null){
-            this.neighborhood = adressData.neighborhood();
+        if (adressDto.neighborhood() != null){
+            this.neighborhood = adressDto.neighborhood();
         }
-        if (adressData.city() != null){
-            this.city = adressData.city();
+        if (adressDto.city() != null){
+            this.city = adressDto.city();
         }
-        if (adressData.state() != null){
-            this.state = adressData.state();
+        if (adressDto.state() != null){
+            this.state = adressDto.state();
         }
-        if (adressData.postalCode() != null){
-            this.postalCode = adressData.postalCode();
+        if (adressDto.postalCode() != null){
+            this.postalCode = adressDto.postalCode();
         }
-        if (adressData.residentialNumber() != null){
-            this.residentialNumber = adressData.residentialNumber();
+        if (adressDto.residentialNumber() != null){
+            this.residentialNumber = adressDto.residentialNumber();
         }
-        if (adressData.complement() != null){
-            this.complement = adressData.complement();
+        if (adressDto.complement() != null){
+            this.complement = adressDto.complement();
         }
     }
 }

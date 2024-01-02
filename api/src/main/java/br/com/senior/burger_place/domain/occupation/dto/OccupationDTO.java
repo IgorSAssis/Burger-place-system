@@ -2,14 +2,16 @@ package br.com.senior.burger_place.domain.occupation.dto;
 
 import br.com.senior.burger_place.domain.occupation.Occupation;
 import br.com.senior.burger_place.domain.occupation.PaymentForm;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 public record OccupationDTO(
         Long id,
+        @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
         LocalDateTime beginOccupation,
+        @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
         LocalDateTime endOccupation,
         PaymentForm paymentForm,
         Integer peopleCount,

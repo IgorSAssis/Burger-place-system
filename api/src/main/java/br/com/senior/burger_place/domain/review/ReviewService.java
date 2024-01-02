@@ -1,5 +1,7 @@
 package br.com.senior.burger_place.domain.review;
 
+import br.com.senior.burger_place.domain.review.dto.ReviewRegisterDTO;
+import br.com.senior.burger_place.domain.review.dto.ReviewUpdateDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,21 +14,21 @@ import java.util.Optional;
 public class ReviewService {
     @Autowired
     ReviewRepository repository;
-    public Review addReview(Long occupationId, ReviewRegisterData data) {
+    public Review addReview(Long occupationId, ReviewRegisterDTO data) {
         if (!repository.verifyOccupationExists(occupationId)){
                 throw new EntityNotFoundException("Não existe uma ocupação com esse ID");
         }
         return repository.save(new Review(occupationId, data));
     }
 
-    public ReviewRegisterData updateReview(Long id, ReviewUpdateData data) {
+    public ReviewRegisterDTO updateReview(Long id, ReviewUpdateDTO data) {
         Optional<Review> optionalReview = repository.findById(id);
         if (optionalReview.isEmpty()){
             throw new EntityNotFoundException("Avaliação não existe");
         }
         Review review = optionalReview.get();
         review.updateInformation(data);
-        ReviewRegisterData responseData = new ReviewRegisterData(review.getGrade(), review.getComment());
+        ReviewRegisterDTO responseData = new ReviewRegisterDTO(review.getGrade(), review.getComment());
         return responseData;
     }
 

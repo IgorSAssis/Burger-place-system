@@ -1,12 +1,74 @@
-INSERT INTO products (name, price, description, active)
-VALUES
-    ('Hamburguer Tradicional', 12.99, 'Hamburguer com ingredientes tradicionais', true),
-    ('Hamburguer Vegetariano', 10.99, 'Hamburguer com opções vegetarianas', true),
-    ('Hamburguer Duplo', 15.99, 'Hamburguer com o dobro de carne e queijo', true),
-    ('Hamburguer de Frango', 11.99, 'Hamburguer feito com carne de frango', true),
-    ('Hamburguer Vegano', 13.99, 'Hamburguer feito com ingredientes veganos', true),
-    ('Hamburguer de Peixe', 14.99, 'Hamburguer com filé de peixe', true),
-    ('Hamburguer Picante', 12.99, 'Hamburguer com molho picante', true),
-    ('Hamburguer Especial da Casa', 16.99, 'Hamburguer exclusivo da casa', true),
-    ('Hamburguer Fitness', 11.99, 'Hamburguer com opções mais saudáveis', true),
-    ('Hamburguer Infantil', 8.99, 'Hamburguer especialmente para crianças', true);
+-- Burgers
+INSERT INTO products (name, ingredients, price, category, active, url) VALUES
+('Hambúrguer Clássico', 'Pão, carne, queijo, alface, tomate, molho especial', 15.99, 'BURGER', true, 'hamburguer-de-vista-frontal-em-um-carrinho_141793-15542.jpg?t=st=1703974865~exp=1703975465~hmac=b66ab82d5aec397420b0da166816e210f1da830aaee690a36cd1b945f2bfe355'),
+('Hambúrguer Vegetariano', 'Pão integral, hambúrguer de quinoa, queijo, alface, tomate, maionese vegana', 14.50, 'BURGER', true, 'cheeseburguer-grelhado-com-tomate-cebola-e-fritas-gerado-por-ia_188544-43039.jpg?w=1380&t=st=1703974912~exp=1703975512~hmac=a539d96675314b4c0c542afb2a96cbb46f2b5d7102cf5eaf18a1e1fad023c98a'),
+('Hambúrguer Duplo', 'Pão, dois hambúrgueres, bacon, queijo, cebola caramelizada, molho barbecue', 18.75, 'BURGER', true, 'cheeseburger-gourmet-grelhado-com-legumes-frescos-e-batatas-fritas-geradas-por-ia_188544-38732.jpg?t=st=1703974949~exp=1703975549~hmac=4b3cd8cbbb4985f68fc721de326ab4a25a94534cf1a3dacadcf08d8f0ab7f9a8'),
+('X-Bacon', 'Pão, hambúrguer, bacon, queijo, alface, tomate, maionese', 17.25, 'BURGER', true, 'closeup-tiro-de-um-hamburguer-com-bacon-e-queijo-uma-caneca-de-cafe-vermelha_181624-4345.jpg?w=1380&t=st=1703974965~exp=1703975565~hmac=cc7b515cdb4046bab814853f747dde50b0bc4b2d9b7858b2e1bf0f8136aa1a1f'),
+('Hambúrguer de Frango', 'Pão, hambúrguer de frango, queijo, alface, tomate, molho especial', 16.50, 'BURGER', true, 'variedade-de-hamburguer-delicioso-de-vista-frontal_23-2148868203.jpg?w=1380&t=st=1703974978~exp=1703975578~hmac=edf6716493cf252a0d2d0d17f67692f0081e5cbc63fc140581e498e1c51ccbd2'),
+('Hambúrguer Vegano de Feijão', 'Pão vegano, hambúrguer de feijão, tomate, alface, cebola roxa, maionese vegana', 15.75, 'BURGER', true, 'vista-superior-deliciosa-composicao-de-hamburguer_23-2148868217.jpg'),
+('X-Tudo', 'Pão, hambúrguer, presunto, ovo, bacon, queijo, alface, tomate, maionese', 19.99, 'BURGER', true, 'delicioso-hamburguer-3d-com-fundo-simples_23-2150914807.jpg?w=740&t=st=1703975026~exp=1703975626~hmac=d729f079e11a987b79821f5b32dff94e9fa27c35f9680d30fd1c04e9a9a7e3c6'),
+('Hambúrguer de Picanha', 'Pão, hambúrguer de picanha, queijo, rúcula, tomate seco, molho especial', 20.25, 'BURGER', true, 'cheeseburguer-gourmet-com-carne-grelhada-tomate-cebola-e-pao-rustico-gerado-por-ia_188544-56059.jpg?w=1380&t=st=1703975040~exp=1703975640~hmac=461708fb6ca0c4f50e28b3a0d607e0025230cb3120130f45e0c367990b6eda78'),
+('Hambúrguer de Salmão', 'Pão integral, hambúrguer de salmão, cream cheese, alface, cebola roxa, molho de ervas', 22.00, 'BURGER', true, 'hamburguer-de-queijo-perfeito-com-legumes-na-mesa-de-madeira-e-fundo-preto-ai-generative_123827-23432.jpg?w=1380&t=st=1703975052~exp=1703975652~hmac=20f8fef44eef92fcffa02849831e9efaff4d051ce1b9b61a79f39d687322631c'),
+('Hambúrguer de Cordeiro', 'Pão, hambúrguer de cordeiro, queijo de cabra, rúcula, cebola caramelizada, molho de hortelã', 21.50, 'BURGER', true, 'hamburguer-delicioso-com-muitos-ingredientes-isolados-no-fundo-branco-molho-de-cheeseburger-saboroso_90220-1266.jpg?w=740&t=st=1703975062~exp=1703975662~hmac=2245870e0e6c77b2d479f36d131cacd59f54dcbc54cc4de0714f50604f3c4c32');
+
+-- Drink
+INSERT INTO products (name, ingredients, price, category, active, url) VALUES
+('Refrigerante Coca-Cola', 'Coca-Cola, gelo', 5.99, 'DRINK', true, 'bebida-fresca-de-cola-com-limao-verde_144627-12396.jpg?w=1380&t=st=1703975556~exp=1703976156~hmac=966b9e9d77e1ea87dcc69f490c401a194925b680b2018d3a3dc221295a11cbde'),
+('Suco Natural de Laranja', 'Laranja, água, açúcar', 7.50, 'DRINK', true, 'suco-de-laranja-fresco-no-copo-em-fundo-escuro_1150-45560.jpg?w=1380&t=st=1703975595~exp=1703976195~hmac=f18cbcc32a5499b5ed499342ca117a692c78d71fab6a386073432e0e4a5fd168'),
+('Água Mineral sem Gás', 'Água mineral', 3.75, 'DRINK', true, 'vidro-transparente-com-agua_23-2148795911.jpg?w=740&t=st=1703975659~exp=1703976259~hmac=9d07ceb5c8b60bc272b1bff117e277b41e438657162d474e03a402f533feeb62'),
+('Café Expresso', 'Café, água quente', 4.25, 'DRINK', true, 'close-up-vista-de-sementes-de-cafe-marrom-com-cafe-no-escuro_179666-32787.jpg?w=1380&t=st=1703975683~exp=1703976283~hmac=aeb86aeff51bb83817e5962b188f6b203c28c50c5100ed79f0de59982b9cd199'),
+('Chá Gelado de Pêssego', 'Chá de pêssego, gelo, açúcar', 6.25, 'DRINK', true, 'bebida-refrescante_144627-20877.jpg?w=740&t=st=1703975742~exp=1703976342~hmac=f508c754efde8c10a29916877fdcc1346a7deda42561a5312deeb8abecc63e66'),
+('Milkshake de Chocolate', 'Leite, sorvete de chocolate, chantilly', 8.99, 'DRINK', true, 'vista-frontal-da-sobremesa-de-chocolate-em-copo-com-canudo_23-2148603311.jpg?w=740&t=st=1703975769~exp=1703976369~hmac=b1592802aac871f4b1a966e2117a97c73aa2fbeb3cd2c21ed498171029bf9b11'),
+('Coquetel de Frutas', 'Frutas variadas, suco de laranja, gelo', 9.50, 'DRINK', true, 'batido-de-verao-com-framboesa-amora-morango-e-gelo_140725-3953.jpg?w=740&t=st=1703975792~exp=1703976392~hmac=f668f4cc50a42963cb0b2fa5861e56cc25e928936cade6de9bb3458574d7da27'),
+('Vinho Tinto Seco', 'Vinho tinto, taça', 15.25, 'DRINK', true, 'vista-frontal-de-tacas-de-vinho-uvas-frescas-nozes-queijo-amarelo-na-placa-de-madeira-garrafa-virada-no-fundo-escuro_140725-144998.jpg?w=1380&t=st=1703975817~exp=1703976417~hmac=f0ee02bc39159c96446a8517bcdc57fb8fe87b13568242862a6e2b41a5ce00be'),
+('Cerveja Artesanal IPA', 'Cerveja IPA, copo', 10.75, 'DRINK', true, 'vista-frontal-de-copos-de-cerveja-com-trigo_23-2148755010.jpg?t=st=1703975831~exp=1703976431~hmac=8578876849b1be22d2e263d7c210b987ce378e77b8234c1d0b8ab4c326096a99'),
+('Limonada Suíça', 'Limão, água, açúcar, gelo', 6.75, 'DRINK', true, 'copos-de-limonada-com-hortela_23-2148371263.jpg?w=740&t=st=1703975859~exp=1703976459~hmac=d4d9505373e6ce9cc22a0e85e9583f0e61eb816829248645f7fe09af328c10e9');
+
+-- Entry
+INSERT INTO products (name, ingredients, price, category, active, url) VALUES
+('Bruschetta de Tomate e Manjericão', 'Pão italiano, tomate, manjericão, azeite de oliva, alho', 12.99, 'ENTRY', true, 'bruschetta-de-salmao-com-pepino-mussarela-endro-cebola-roxa-tomate-seco-e-limao_141793-2269.jpg?w=740&t=st=1703976046~exp=1703976646~hmac=df421657cb3d044120ef570e451dc036c4c54cb7c3dbcd6f8919681cb57f1fe3'),
+('Carpaccio de Carne', 'Carne finamente fatiada, molho mostarda, queijo parmesão, rúcula', 14.50, 'ENTRY', true, 'carpaccio-prato-com-carne-rabanete-alface-e-ervas_140725-8266.jpg?w=740&t=st=1703976085~exp=1703976685~hmac=8c14190b57d19e7c4ec82d74feb1ef684b6302c52d692b5499228b1053e2d64b'),
+('Ceviche de Peixe Branco', 'Peixe branco, limão, cebola roxa, coentro, pimenta, milho', 13.75, 'ENTRY', true, 'lula-frita-com-alho_1339-5719.jpg?w=1380&t=st=1703976115~exp=1703976715~hmac=05b43a8c04766b0ea0fd159739d118597b4511882d23848db81697430c7db364'),
+('Rolinhos Primavera', 'Massa de arroz, legumes, molho agridoce', 11.25, 'ENTRY', true, 'rolo-de-ovo-ou-fried-spring-rolls-no-alimento-tailandes-da-placa-branca_1150-21488.jpg?w=1380&t=st=1703976168~exp=1703976768~hmac=1d3a2afb6b638099a492f870249eb032ab777555cc2c708cb17351358bc9c26d'),
+('Dadinhos de Tapioca', 'Tapioca, queijo coalho, geleia de pimenta', 10.50, 'ENTRY', true, 'courgette-de-frango-servido-com-maionese-com-ervas_140725-2491.jpg?w=740&t=st=1703976197~exp=1703976797~hmac=ec9af9a4efd0867739faefc214008b56b8c24ebf42fe06f118fc27c4bb9c9cd2'),
+('Caldo Verde', 'Batata, couve, linguiça defumada, azeite de oliva', 9.99, 'ENTRY', true, 'variedade-de-uma-refeicao-saudavel-na-mesa_23-2148992950.jpg?w=1380&t=st=1703976215~exp=1703976815~hmac=925bb97c1dc40f414d71a25357fffd4a3dd307faf84a415d48f07df3b661ab73'),
+('Pastel de Queijo', 'Massa de pastel, queijo, temperos', 8.50, 'ENTRY', true, 'cafe-da-manha-saudavel-lasanha-ou-cacarola-ou-uma-torta-de-carne-assada-no-forno-com-queijo-derretido-no-topo_114579-87.jpg?w=740&t=st=1703976239~exp=1703976839~hmac=c210a4e332550626477097ee25991e9861513ff898440d327be2d6c17cc89964'),
+('Salada Caprese', 'Tomate, mussarela de búfala, manjericão, azeite de oliva', 11.75, 'ENTRY', true, 'vista-lateral-da-salada-fresca-com-pepino-de-tomate-queijo-feta-e-ervas-secas-com-azeite-de-oliva-em-uma-tigela-branca_140725-11935.jpg?w=740&t=st=1703976295~exp=1703976895~hmac=3b7c64e5595264e79ffb94ccdb6e1263f4b32364db12bb4d6dd8384d5df46832'),
+('Pão de Alho', 'Pão francês, alho, manteiga, temperos', 10.25, 'ENTRY', true, 'queijo-camembert-assado-com-alecrim-e-mel-comida-saborosa_2829-7098.jpg?w=1380&t=st=1703976318~exp=1703976918~hmac=5a70b4708907303e4e3c843cfb76b53ce3c5361c93605896d9724113e0428dce'),
+('Tábua de Frios', 'Diversos tipos de queijo e presunto, azeitonas, torradas', 15.75, 'ENTRY', true, 'antepasto-de-catering-prato-com-bacon-carne-seca-salame-queijo-e-uvas-em-uma-mesa-de-madeira_2829-19732.jpg?t=st=1703976331~exp=1703976931~hmac=dc0ff2a3ea846bd21ec27bdf5b1a922b07ac1ad056253af3940d61307d708fa3');
+
+-- Dessert
+INSERT INTO products (name, ingredients, price, category, active, url) VALUES
+('Pudim de Leite', 'Leite condensado, leite, ovos, açúcar', 9.99, 'DESSERT', true, 'vista-frontal-do-prato-com-creme-e-hortela_23-2148489126.jpg?w=996&t=st=1703976509~exp=1703977109~hmac=43f7a9a2e751243d57f1e6d5b6f739e2195bb435f58320dde0b910f491fbec3a'),
+('Torta de Chocolate', 'Bolacha maisena, chocolate, creme de leite, manteiga', 12.50, 'DESSERT', true, 'bolo-de-brownie-de-chocolate-com-uma-bola-de-sorvete_155003-433.jpg?w=740&t=st=1703976533~exp=1703977133~hmac=750113f5a1935505aeb066a61975fde4a3dd3cd532146060ef1d3de0ba073031'),
+('Mousse de Maracujá', 'Maracujá, creme de leite, leite condensado', 10.75, 'DESSERT', true, 'panna-cotta-com-fatias-de-abacaxi_140725-2172.jpg?w=740&t=st=1703976553~exp=1703977153~hmac=481c4d0a2e2488bcf9e88fc16854c253a932ce3158a82096df21e6ef4303d438'),
+('Cheesecake de Morango', 'Cream cheese, morangos, biscoito, açúcar', 11.25, 'DESSERT', true, 'torta-com-morangos-e-chantilly-decorado-com-folhas-de-hortela_2829-19894.jpg?w=996&t=st=1703976571~exp=1703977171~hmac=13180924c3b9a3f4dad0553310e2e8a9fdc9df6b8a01f8760c91ca252e430f2b'),
+('Sorvete de Creme', 'Leite, creme de leite, açúcar, essência de baunilha', 8.50, 'DESSERT', true, 'coold-sorvete-doce-com-chocolate_144627-7294.jpg?w=996&t=st=1703976591~exp=1703977191~hmac=118551a6c9c095cf7e499778dfe2c6aa579112fc97ba464605d41aadbc1ac2c9'),
+('Torta de Limão', 'Bolacha maisena, leite condensado, limão', 10.99, 'DESSERT', true, 'cheesecake-de-newyork-caseiro-com-limao-e-hortela-sobremesa-organica-saudavel-vista-superior_114579-8874.jpg?w=996&t=st=1703976609~exp=1703977209~hmac=0e996f9c838b73d9e00c4071f826c51f91213e4d6ca647bcdf5d2e81106863c4'),
+('Brigadeiro', 'Leite condensado, chocolate em pó, manteiga', 7.75, 'DESSERT', true, 'close-up-shot-de-deliciosos-bombons-de-chocolate_181624-33237.jpg?w=996&t=st=1703976629~exp=1703977229~hmac=2b395e82fb6d70372f9ce6970fb4552b740c222ba0867135718be4e586ec9d30'),
+('Creme Brûlée', 'Creme de leite, gemas, açúcar, baunilha', 12.25, 'DESSERT', true, 'sobremesa-com-uma-crosta-de-acucar-queimado-por-um-macarico_144627-16747.jpg?w=740&t=st=1703976650~exp=1703977250~hmac=05e1ab65b4fe6e1b16003b5a0c7ac346582b357fdc09d66a8d448618315ea2b7'),
+('Tiramisu', 'Biscoito champanhe, café, queijo mascarpone, cacau em pó', 13.75, 'DESSERT', true, 'tiramisu-servido-em-copo_140725-4271.jpg?w=740&t=st=1703976667~exp=1703977267~hmac=f92e6a560f39c77374c21682db2b485e8a1e4b96480b89650b52ff5f5166910c'),
+('Pavê de Chocolate e Morango', 'Bolacha maisena, chocolate, morango, creme de leite', 11.50, 'DESSERT', true, 'bolo-delicioso_144627-16761.jpg?w=740&t=st=1703976685~exp=1703977285~hmac=f86d70dfefe342da09c10fa4ab6e9a969d27033ebcb8526c13bf4e30c1b0b044');
+
+-- Side dishes
+INSERT INTO products (name, ingredients, price, category, active, url) VALUES
+('Arroz Branco', 'Arroz, água, sal', 5.99, 'SIDE_DISHES', true, 'arroz-cozido-em-um-copo-vermelho-colocado-no-chao-de-madeira-compensada_1150-17074.jpg?w=996&t=st=1703976902~exp=1703977502~hmac=67cf1a5efcceff08a86066112355199712c88e050f64615be269b706714e9921'),
+('Feijão Tropeiro', 'Feijão, farinha de mandioca, bacon, linguiça, ovos, temperos', 8.50, 'SIDE_DISHES', true, 'sopa-fresca-com-especiarias_144627-34284.jpg?w=740&t=st=1703976927~exp=1703977527~hmac=c42367b349233d1aba1960f1952b8f00bfbcc3e33f5c49c0b283f072f5f306bc'),
+('Purê de Batata', 'Batata, leite, manteiga, sal', 6.75, 'SIDE_DISHES', true, 'pure-de-batatas-frescas-e-saborosas_2829-11458.jpg?w=996&t=st=1703976947~exp=1703977547~hmac=082bb512f5862a142c674d9ab7888b6fbf80961c1e9832199691557afdf80369'),
+('Farofa de Alho', 'Farinha de mandioca, alho, manteiga, temperos', 7.25, 'SIDE_DISHES', true, 'bandeja-de-madeira-cheia-de-pilaf-de-arroz-integral-recem-cozido-em-fundo-de-marmore-foto-de-alta-qualidade_114579-77593.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Legumes Grelhados', 'Abobrinha, berinjela, pimentão, temperos', 9.50, 'SIDE_DISHES', true, 'salada-de-legumes-em-um-prato_181624-1363.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Salada Mista', 'Alface, tomate, pepino, cebola, temperos, vinagrete', 7.99, 'SIDE_DISHES', true, 'salada-de-legumes-na-mesa_23-2148515515.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Gratinada', 'Batata, creme de leite, queijo, temperos', 8.25, 'SIDE_DISHES', true, 'frango-cozido-com-batatas-e-servido-com-verduras_141793-1144.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Brócolis ao Alho e Óleo', 'Brócolis, alho, azeite de oliva, sal', 6.99, 'SIDE_DISHES', true, 'salada-de-vegetais-frescos-e-saudaveis-na-toalha-verde-despojada-na-mesa-cinza_140725-86670.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Legumes Cozidos', 'Cenoura, brócolis, vagem, temperos', 7.75, 'SIDE_DISHES', true, 'ensopado-picante-quente-de-berinjela-pimentao-azeitonas-e-alcaparras-com-folhas-de-manjericao_2829-6421.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Quiabo Refogado', 'Quiabo, cebola, tomate, temperos', 8.50, 'SIDE_DISHES', true, 'vista-de-close-up-do-conceito-de-feijao-asiatico_23-2148678287.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita Simples', 'Batatas, sal', 8.99, 'SIDE_DISHES', true, 'batatas-fritas-crocantes-com-ketchup-e-maionese_1150-26588.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Cheddar e Bacon', 'Batatas, queijo cheddar, bacon, cebolinha, maionese', 12.50, 'SIDE_DISHES', true, 'placa-de-madeira-com-batatas-fritas-e-omelete-na-mesa-pintada_23-2148113639.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Molho Especial', 'Batatas, molho especial, temperos', 10.75, 'SIDE_DISHES', true, 'batatas-fritas-crocantes-com-ketchup-e-maionese_1150-26588.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Parmesão e Ervas', 'Batatas, queijo parmesão, ervas finas, azeite de oliva, sal', 11.25, 'SIDE_DISHES', true, 'fatias-de-batata-frita_2829-11214.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Maionese de Alho', 'Batatas, maionese de alho, temperos', 10.50, 'SIDE_DISHES', true, 'vista-superior-de-batatas-fritas-salgadas-no-prato-com-molho-especial_23-2148701488.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Molho Barbecue', 'Batatas, molho barbecue, temperos', 11.99, 'SIDE_DISHES', true, 'vista-frontal-deliciosas-batatas-fritas-com-temperos-na-superficie-escura_179666-34419.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Pimenta e Limão', 'Batatas, pimenta, limão, sal', 10.25, 'SIDE_DISHES', true, 'vista-de-cima-batatas-fritas-dentro-de-uma-panela-com-diferentes-temperos-e-vegetais-no-fundo-escuro_140725-126815.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Cebola Crocante', 'Batatas, cebola crocante, temperos especiais', 11.50, 'SIDE_DISHES', true, 'fatias-de-frango-frito-misturadas-com-pimentao_140725-2086.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Alecrim e Alho', 'Batatas, alecrim, alho, azeite de oliva, sal', 10.75, 'SIDE_DISHES', true, 'vista-frontal-de-batatas-assadas-com-vegetais-cozidos-no-espaco-escuro_140725-79243.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais'),
+('Batata Frita com Molho Picante', 'Batatas, molho picante, temperos', 11.75, 'SIDE_DISHES', true, 'batatas-fritas-e-ketchup_144627-32472.jpg?size=626&ext=jpg&ga=GA1.1.1337315170.1703621694&semt=ais');

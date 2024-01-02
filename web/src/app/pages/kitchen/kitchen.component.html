@@ -1,7 +1,64 @@
 <app-breadcrumb [currentURI]="'Cozinha'" />
 
+<section *ngIf="readyDeliverOrderItems.orderItems.length > 0">
+  <button (click)="toggleOrderItemSection(0)">
+    <span>
+      <app-svg-image
+        [path]="'../../../assets/arrow.svg'"
+        [width]="'32px'"
+        [height]="'32px'"
+        [color]="'var(--gray-font)'"
+      />
+      Para serem entregues
+    </span>
+    <span> Total: {{ readyDeliverOrderItems.totalElements }} </span>
+  </button>
+
+  <div class="expandable" [class.expanded]="expandedSections[0]">
+    <ul class="card-list">
+      <li *ngFor="let item of readyDeliverOrderItems.orderItems">
+        <strong>Comanda #{{ item.id | stringPadding : 4 : "0" }}</strong>
+        <ul class="card-items">
+          <li>
+            <div>
+              <input
+                checked
+                type="checkbox"
+                id="cmd-{{ item.id }}-item-{{ item.id }}"
+              />
+              <label for="cmd-{{ item.id }}-item-{{ item.id }}">
+                <b>{{ item.amount }} x {{ item.productName }}</b>
+                {{ item.ingredients }}
+              </label>
+            </div>
+
+            <p *ngIf="item.observation">
+              <b>OBS:</b>
+              {{ item.observation }}
+            </p>
+          </li>
+        </ul>
+
+        <div>
+          <p>
+            <b>Numero da mesa: </b>
+            {{ item.boardNumber }}
+          </p>
+        </div>
+
+        <button
+          (click)="deliverOrderItem(item.id, item.occupationId)"
+          class="orange"
+        >
+          Entregar
+        </button>
+      </li>
+    </ul>
+  </div>
+</section>
+
 <section>
-  <button>
+  <button (click)="toggleOrderItemSection(1)">
     <span>
       <app-svg-image
         [path]="'../../../assets/arrow.svg'"
@@ -11,15 +68,50 @@
       />
       Em andamento
     </span>
-    <span> Total: 10 </span>
+    <span> Total: {{ inProgressOrderItems.totalElements }} </span>
   </button>
-  <div class="expandable">
-    <app-kitchen-card-list [kitchenCards]="inProgressCards" />
+
+  <div class="expandable" [class.expanded]="expandedSections[1]">
+    <ul class="card-list">
+      <li *ngFor="let item of inProgressOrderItems.orderItems">
+        <strong>Comanda #{{ item.id | stringPadding : 4 : "0" }}</strong>
+        <ul class="card-items">
+          <li>
+            <div>
+              <input
+                type="checkbox"
+                id="cmd-{{ item.id }}-item-{{ item.id }}"
+              />
+              <label for="cmd-{{ item.id }}-item-{{ item.id }}">
+                <b>{{ item.amount }} x {{ item.productName }}</b>
+                {{ item.ingredients }}
+              </label>
+            </div>
+
+            <p *ngIf="item.observation">
+              <b>OBS:</b>
+              {{ item.observation }}
+            </p>
+          </li>
+        </ul>
+
+        <div>
+          <p>
+            <b>Numero da mesa: </b>
+            {{ item.boardNumber }}
+          </p>
+        </div>
+
+        <button (click)="finishOrderItem(item.id, item.occupationId)">
+          Finalizar preparo
+        </button>
+      </li>
+    </ul>
   </div>
 </section>
 
 <section>
-  <button>
+  <button (click)="toggleOrderItemSection(2)">
     <span>
       <app-svg-image
         [path]="'../../../assets/arrow.svg'"
@@ -29,9 +121,98 @@
       />
       Pendentes
     </span>
-    <span> Total: 10 </span>
+    <span> Total: {{ pendingOrderItems.totalElements }} </span>
   </button>
-  <div class="expandable">
-    <app-kitchen-card-list [kitchenCards]="todoCards" />
+
+  <div class="expandable" [class.expanded]="expandedSections[2]">
+    <ul class="card-list">
+      <li *ngFor="let item of pendingOrderItems.orderItems">
+        <strong>Comanda #{{ item.id | stringPadding : 4 : "0" }}</strong>
+        <ul class="card-items">
+          <li>
+            <div>
+              <input
+                type="checkbox"
+                id="cmd-{{ item.id }}-item-{{ item.id }}"
+              />
+              <label for="cmd-{{ item.id }}-item-{{ item.id }}">
+                <b>{{ item.amount }} x {{ item.productName }}</b>
+                {{ item.ingredients }}
+              </label>
+            </div>
+
+            <p *ngIf="item.observation">
+              <b>OBS:</b>
+              {{ item.observation }}
+            </p>
+          </li>
+        </ul>
+
+        <div>
+          <p>
+            <b>Numero da mesa: </b>
+            {{ item.boardNumber }}
+          </p>
+        </div>
+
+        <button
+          (click)="startOrderItem(item.id, item.occupationId)"
+          class="blue"
+        >
+          Iniciar preparo
+        </button>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <button (click)="toggleOrderItemSection(3)">
+    <span>
+      <app-svg-image
+        [path]="'../../../assets/arrow.svg'"
+        [width]="'32px'"
+        [height]="'32px'"
+        [color]="'var(--gray-font)'"
+      />
+      Cancelados
+    </span>
+    <span> Total: {{ canceledOrderItems.totalElements }} </span>
+  </button>
+
+  <div class="expandable" [class.expanded]="expandedSections[3]">
+    <ul class="card-list">
+      <li *ngFor="let item of canceledOrderItems.orderItems">
+        <strong class="canceled-card"
+          >Comanda #{{ item.id | stringPadding : 4 : "0" }}</strong
+        >
+        <ul class="card-items">
+          <li>
+            <div>
+              <input
+                type="checkbox"
+                id="cmd-{{ item.id }}-item-{{ item.id }}"
+              />
+              <label for="cmd-{{ item.id }}-item-{{ item.id }}">
+                <b>{{ item.amount }} x {{ item.productName }}</b>
+                {{ item.ingredients }}
+              </label>
+            </div>
+
+            <p *ngIf="item.observation">
+              <b>OBS:</b>
+              {{ item.observation }}
+            </p>
+          </li>
+        </ul>
+
+        <div>
+          <p>
+            <b>Numero da mesa: </b>
+            {{ item.boardNumber }}
+          </p>
+        </div>
+      </li>
+    </ul>
   </div>
 </section>
