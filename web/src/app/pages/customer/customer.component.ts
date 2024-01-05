@@ -24,6 +24,11 @@ import {
   OrderItemStatus,
   OrderItemStatusType,
 } from '../../services/order-item.service';
+import {
+  CreateReviewDTO,
+  Review,
+  ReviewService,
+} from '../../services/review.service';
 
 @Component({
   selector: 'app-customer',
@@ -43,6 +48,7 @@ export class CustomerComponent implements OnInit {
   private productService: ProductService = inject(ProductService);
   private occupationService: OccupationService = inject(OccupationService);
   private modalService: ModalService = inject(ModalService);
+  private reviewService: ReviewService = inject(ReviewService);
   private router: Router = inject(Router);
 
   private _expandedItems: boolean[];
@@ -53,8 +59,10 @@ export class CustomerComponent implements OnInit {
   private _currentPage: number;
 
   @Input()
-  private occupationId: number | undefined;
-  private _occupation: Occupation | undefined;
+  private occupationId?: number;
+
+  private _occupation?: Occupation;
+  private _review?: Review;
 
   constructor() {
     this._currentPage = 0;
@@ -68,6 +76,7 @@ export class CustomerComponent implements OnInit {
   ngOnInit(): void {
     this.fetchOccupation();
     this.fetchProducts();
+    this.fetchReview();
   }
 
   public get expandedItems() {
@@ -194,6 +203,68 @@ export class CustomerComponent implements OnInit {
     return this._activeMenu === categoryType;
   }
 
+  onReview() {
+    this.fetchReview();
+    console.log('Fetched reviews');
+    console.log(this._review);
+
+    this.modalService.openCreateOrEditReviewModal(this._review).subscribe({
+      next: (data) => {
+        const mappedReview = this.reviewService.mapToReview(data);
+        console.log("mappedReview");
+        console.log(mappedReview);
+
+        if (mappedReview.topicReviews.filter(item => item.grade > 0).length === 0) {
+          alert(
+            'É necessário realizar alguma avaliação para concluir a operação'
+          );
+          return;
+        }
+
+        if (typeof this._review?.id === 'undefined') {
+          this.createReview(mappedReview);
+          this.modalService.closeModal();
+          return;
+        }
+
+        const itemsToCreate = mappedReview.topicReviews.filter(
+          (item) => typeof item.id === 'undefined' && item.grade !== 0
+        );
+        const itemsToUpdate = mappedReview.topicReviews.filter(
+          (item) => typeof item.id !== 'undefined' && item.grade !== 0
+        );
+        const itemsToDelete = mappedReview.topicReviews.filter(
+          (item) => typeof item.id !== 'undefined' && item.grade === 0
+        );
+
+        itemsToDelete.forEach((item) => {
+          this.reviewService.deleteReviewTopic(item.id as number);
+        });
+
+        itemsToUpdate.forEach((item) => {
+          this.reviewService.updateReviewTopic(item.id as number, {
+            grade: item.grade,
+          });
+        });
+
+        itemsToCreate.forEach((item) => {
+          this.reviewService.createReviewTopic({
+            reviewId: this._review!.id as number,
+            category: item.category,
+            grade: item.grade,
+          });
+        });
+
+        if (mappedReview.comment) {
+          this.reviewService.updateReview(mappedReview.id as number, mappedReview.comment);
+        }
+
+        this._review = mappedReview;
+        this.modalService.closeModal();
+      },
+    });
+  }
+
   private fetchProducts() {
     this.productService
       .fetchProducts({
@@ -227,6 +298,26 @@ export class CustomerComponent implements OnInit {
       complete: () => {
         console.log('Successfull');
       },
+    });
+  }
+
+  private fetchReview() {
+    if (!this.occupationId) {
+      return;
+    }
+
+    this.reviewService.fetchReview(this.occupationId).subscribe({
+      next: (data) => {
+        console.log('Data');
+        console.log(data);
+        this._review = {
+          id: data.id,
+          comment: data.comment,
+          topicReviews: data.topicReviews,
+        };
+      },
+      error: (error) => console.error(error),
+      complete: () => console.log('Successfull'),
     });
   }
 
@@ -294,5 +385,32 @@ export class CustomerComponent implements OnInit {
         next: () => callback(),
         error: (error) => console.error(error),
       });
+  }
+
+  private createReview(review: Review) {
+    if (!this.occupationId) {
+      return;
+    }
+
+    const createReviewDTO: CreateReviewDTO = {
+      comment: review.comment,
+      occupationId: this.occupationId,
+      items: review.topicReviews.map((reviewItem) => {
+        return {
+          category: reviewItem.category,
+          grade: reviewItem.grade,
+        };
+      }),
+    };
+    console.log('createReviewDTO');
+
+    console.log(createReviewDTO);
+
+    this.reviewService.createReview(createReviewDTO).subscribe({
+      next: (data) => {
+        this._review = data;
+        console.log(this._review);
+      },
+    });
   }
 }

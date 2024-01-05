@@ -18,6 +18,8 @@ import {
   EditOrderItemAction,
   EditOrderItemModalComponent,
 } from '../components/edit-order-item-modal/edit-order-item-modal.component';
+import { CreateOrEditReviewModalComponent } from '../components/create-or-edit-review-modal/create-or-edit-review-modal.component';
+import { Review, ReviewUI } from './review.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +28,7 @@ export class ModalService {
   private createOccupationNotifier?: Observable<number>;
   private createOrEditOrderItemNotifier?: Observable<CreateOrEditOrderItemOutputData>;
   private editOrderItemNotifier?: Observable<EditOrderItemAction>;
+  private createOrEditReviewNotifier?: Observable<ReviewUI>;
 
   private appRef: ApplicationRef = inject(ApplicationRef);
   private injector: EnvironmentInjector = inject(EnvironmentInjector);
@@ -135,6 +138,33 @@ export class ModalService {
     this.appRef.attachView(this.newModalComponent.hostView);
 
     return this.createOrEditOrderItemNotifier;
+  }
+
+  openCreateOrEditReviewModal(review: Review | undefined) {
+    const newComponent = createComponent(CreateOrEditReviewModalComponent, {
+      environmentInjector: this.injector,
+    });
+
+    newComponent.instance.setReview(review);
+    if (review) {
+      newComponent.instance.type = "EDIT";
+    }
+    this.createOrEditReviewNotifier =
+      newComponent.instance.submitEvent.asObservable();
+
+    this.newModalComponent = createComponent(ModalComponent, {
+      environmentInjector: this.injector,
+      projectableNodes: [[newComponent.location.nativeElement]],
+    });
+
+    this.newModalComponent.hostView.detectChanges();
+
+    document.body.appendChild(this.newModalComponent.location.nativeElement);
+
+    this.appRef.attachView(newComponent.hostView);
+    this.appRef.attachView(this.newModalComponent.hostView);
+
+    return this.createOrEditReviewNotifier;
   }
 
   closeModal() {

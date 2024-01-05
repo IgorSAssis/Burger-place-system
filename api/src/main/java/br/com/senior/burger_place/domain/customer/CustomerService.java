@@ -22,6 +22,10 @@ public class CustomerService {
         if (customerRepository.existsByEmail(data.email())) {
             throw new DuplicateKeyException("Já existe um cliente com o mesmo e-mail.");
         }
+        if (data.cpf().length() > 11) {
+            throw new IllegalArgumentException("O CPF deve ter 11 dígitos");
+
+        }
         return customerRepository.save(new Customer(data));
     }
 

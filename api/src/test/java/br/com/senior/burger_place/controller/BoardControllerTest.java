@@ -360,7 +360,7 @@ class BoardControllerTest {
 
         ResultActions response = this.mockMvc
                 .perform(MockMvcRequestBuilders.delete("/boards/{id}", 1l)
-                        .contentType(MediaType.APPLICATION_JSON) // APAGAR DPS
+                        .contentType(MediaType.APPLICATION_JSON)
                 );
         response
                 .andExpect(MockMvcResultMatchers.status().isNoContent())

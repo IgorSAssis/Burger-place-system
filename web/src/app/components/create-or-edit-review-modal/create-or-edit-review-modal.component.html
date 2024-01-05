@@ -1,0 +1,19 @@
+<div class="container">
+  <h2>{{ type === "CREATE" ? "Realizar avaliação" : "Atualizar avaliação" }}</h2>
+
+  <div class="avaliations">
+    <div *ngFor="let item of review?.topicReviews; index as itemIndex" class="avaliation-category">
+      <p>{{ item.category }}</p>
+      <div class="stars">
+        <button *ngFor="let isSelected of item.stars; index as starIndex" (click)="doRate(itemIndex, starIndex)">
+          <app-svg-image [path]="'../../../assets/star-icon.svg'" [width]="'24px'" [height]="'24px'"
+            [color]="isSelected ? 'var(--yellow)' : 'var(--gray-var-2)'" />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <textarea placeholder="Conte-nos como foi a sua experiência..." [(ngModel)]="comment">{{ comment }}</textarea>
+
+  <button (click)="onSubmit()">{{ type === "CREATE" ? "Realizar avaliação" : "Atualizar avaliação" }}</button>
+</div>

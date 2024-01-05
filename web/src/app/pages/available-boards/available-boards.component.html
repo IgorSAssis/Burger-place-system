@@ -85,7 +85,7 @@
       </li>
     </ol>
 
-    <div class="pagination">
+    <div class="pagination" *ngIf="boards.length > 0">
       <app-pagination
         (activePageEvent)="changeCurrentPage($event)"
         [totalPages]="totalPages"

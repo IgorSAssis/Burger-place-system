@@ -1,8 +1,8 @@
 package br.com.senior.burger_place.controller;
 
 import br.com.senior.burger_place.domain.customer.Customer;
-import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
 import br.com.senior.burger_place.domain.customer.CustomerService;
+import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
 import br.com.senior.burger_place.domain.customer.dto.CustomerUpdatedDTO;
 import br.com.senior.burger_place.domain.customer.dto.ListingCustomersDTO;
 import jakarta.validation.Valid;

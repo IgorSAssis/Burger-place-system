@@ -1,12 +1,12 @@
 package br.com.senior.burger_place.controller;
 
-import br.com.senior.burger_place.domain.board.Board;
-import br.com.senior.burger_place.domain.occupation.Occupation;
-import br.com.senior.burger_place.domain.occupation.PaymentForm;
 import br.com.senior.burger_place.domain.review.Review;
 import br.com.senior.burger_place.domain.review.ReviewService;
+import br.com.senior.burger_place.domain.review.dto.ListingReviewDTO;
 import br.com.senior.burger_place.domain.review.dto.ReviewRegisterDTO;
 import br.com.senior.burger_place.domain.review.dto.ReviewUpdateDTO;
+import br.com.senior.burger_place.domain.review.topicReview.TopicReview;
+import br.com.senior.burger_place.domain.review.topicReview.dto.TopicReviewRegisterDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
@@ -26,12 +26,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
+import static br.com.senior.burger_place.domain.review.topicReview.Category.AMBIENTE;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,12 +49,13 @@ class ReviewControllerTest {
 
     @Test
     public void registerReview_whenRegistrationReviewForOccupationThatDoesNotExist_shouldReturnHttpStatus404() throws Exception {
-        ReviewRegisterDTO dto = new ReviewRegisterDTO(4, "comentário");
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1L, "Comentário",
+                List.of(new TopicReviewRegisterDTO(5, AMBIENTE)));
 
-        when(reviewService.addReview(1l, dto)).thenThrow(new EntityNotFoundException("Não existe uma ocupação com esse ID"));
+        when(reviewService.addReview(dto)).thenThrow(new EntityNotFoundException("Não existe uma ocupação com esse ID"));
 
         ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/reviews/{occupationId}", 1l)
+                .perform(MockMvcRequestBuilders.post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
                 );
@@ -64,15 +63,15 @@ class ReviewControllerTest {
         response
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andDo(MockMvcResultHandlers.print());
-        verify(reviewService, times(1)).addReview(1l, dto);
+        verify(reviewService, times(1)).addReview(dto);
     }
 
     @Test
-    public void registerReview_whenRegistrationDataNotIsValid_shouldReturnHttpStatus400() throws Exception {
-        ReviewRegisterDTO dto = new ReviewRegisterDTO(null, null);
+    public void registerReview_whenItemDataNotEmpty_shouldReturnHttpStatus400() throws Exception {
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1l, "comentário", null);
 
         ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/reviews/{occupationId}", 1l)
+                .perform(MockMvcRequestBuilders.post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
                 );
@@ -81,26 +80,29 @@ class ReviewControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(jsonPath(
                         "$[0].field",
-                        CoreMatchers.is("grade"))
+                        CoreMatchers.is("items"))
                 )
                 .andExpect(jsonPath(
                         "$[0].message",
-                        CoreMatchers.is("must not be null")
+                        CoreMatchers.is("must not be empty")
                 ))
                 .andDo(MockMvcResultHandlers.print());
-        verify(reviewService, never()).addReview(any(), any());
+        verify(reviewService, never()).addReview(any());
     }
 
     @Test
     public void registerReview_whenRegistrationDataIsValid_shouldReturnHttpStatus201WithReviewData() throws Exception {
-        ReviewRegisterDTO dto = new ReviewRegisterDTO(4, "comentario");
-        Review review = new Review(1l, dto);
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1L, "Comentário",
+                List.of(new TopicReviewRegisterDTO(5, AMBIENTE)));
+        Review review = new Review(dto.occupationId(), dto.comment());
         review.setId(10l);
+        review.setTopicReviews(dto.items().stream().map(item -> new TopicReview(item.grade(), item.category(), review.getId())).toList());
+        ListingReviewDTO listingReviewDTO = new ListingReviewDTO(review);
 
-        when(reviewService.addReview(1l, dto)).thenReturn(review);
+        when(reviewService.addReview(dto)).thenReturn(listingReviewDTO);
 
         ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/reviews/{occupationId}", 1l)
+                .perform(MockMvcRequestBuilders.post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
                 );
@@ -129,30 +131,29 @@ class ReviewControllerTest {
                         CoreMatchers.is(review.getId().intValue())
                 ))
                 .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.grade",
-                        CoreMatchers.is(review.getGrade())
-                ))
-                .andExpect(MockMvcResultMatchers.jsonPath(
                         "$.comment",
-                        CoreMatchers.containsString(review.getComment())
+                        CoreMatchers.is(review.getComment())
                 ))
                 .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.occupation.id",
-                        CoreMatchers.is(1)
+                        "$.topicReviews[0].grade",
+                        CoreMatchers.is(dto.items().get(0).grade())
+                ))
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "$.topicReviews[0].category",
+                        CoreMatchers.equalTo(dto.items().get(0).category().name())
                 ));
     }
 
     @Test
     public void listAllReview_whenExistReviews_shouldReturnStatus200WithReviews() throws Exception {
-        Review review1 = new Review(1l, 4, "comentario", mock(Occupation.class));
-        Review review2 = new Review(2l, 5, "comentario", mock(Occupation.class));
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1L, "Comentário",
+                List.of(new TopicReviewRegisterDTO(5, AMBIENTE)));
+        Review review = new Review(dto.occupationId(), dto.comment());
+        review.setTopicReviews(dto.items().stream().map(item -> new TopicReview(item.grade(), item.category(), review.getId())).toList());
+
 
         PageImpl<Review> somePage = new PageImpl<>(
-                Arrays.asList(
-                        review1,
-                        review2
-                ),
-                Pageable.ofSize(10), 10);
+                Arrays.asList(review), Pageable.ofSize(10), 10);
         when(this.reviewService.listAllReview(any(Pageable.class))).thenReturn(somePage);
 
         ResultActions response = this.mockMvc
@@ -161,7 +162,7 @@ class ReviewControllerTest {
                 );
         response
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content.size()", CoreMatchers.is(2)))
+                .andExpect(jsonPath("$.content.size()", CoreMatchers.is(1)))
                 .andDo(MockMvcResultHandlers.print());
         verify(reviewService, times(1)).listAllReview(any(Pageable.class));
     }
@@ -188,9 +189,14 @@ class ReviewControllerTest {
 
     @Test
     public void listReviewById_whenExistReview_shouldReturnStatus200WithReview() throws Exception {
-        Occupation occupation = new Occupation(5L, LocalDateTime.now(), null, 2, PaymentForm.CARTAO_CREDITO, new ArrayList<>(), new Board(), new HashSet<>(), true);
-        Review someReview = new Review(1l, 4, "comentario", occupation);
-        when(reviewService.listReviewById(1l)).thenReturn(someReview);
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1L, "Comentario",
+                List.of(new TopicReviewRegisterDTO(5, AMBIENTE)));
+        Review review = new Review(dto.occupationId(), dto.comment());
+        review.setId(1l);
+        review.setTopicReviews(dto.items().stream().map(item -> new TopicReview(item.grade(), item.category(), review.getId())).toList());
+        ListingReviewDTO listingReviewDTO = new ListingReviewDTO(review);
+
+        when(reviewService.listReviewById(1l)).thenReturn(listingReviewDTO);
 
         ResultActions response = this.mockMvc
                 .perform(MockMvcRequestBuilders.get("/reviews/{id}", 1l)
@@ -203,12 +209,14 @@ class ReviewControllerTest {
                             result.getResponse().getContentAsString(),
                             Review.class
                     );
-                    Assertions.assertEquals(someReview.getGrade(), responseResult.getGrade());
-                    Assertions.assertEquals(someReview.getComment(), responseResult.getComment());
-                    Assertions.assertEquals(someReview.getId(), responseResult.getId());
-                    Assertions.assertEquals(someReview.getOccupation().getId(), responseResult.getOccupation().getId());
+                    Assertions.assertEquals(listingReviewDTO.comment(), responseResult.getComment());
+                    Assertions.assertEquals(listingReviewDTO.topicReviews().get(0).grade(), responseResult.getTopicReviews().get(0).getGrade());
+                    Assertions.assertEquals(listingReviewDTO.topicReviews().get(0).category(), responseResult.getTopicReviews().get(0).getCategory());
+                    Assertions.assertEquals(listingReviewDTO.topicReviews().get(0).id(), responseResult.getTopicReviews().get(0).getId());
+
                 });
     }
+
 
     @Test
     public void listReviewById_whenReviewDoesNotExist_shouldReturnStatus404() throws Exception {
@@ -228,11 +236,13 @@ class ReviewControllerTest {
 
     @Test
     public void updateReview_whenDtoIsValid_shouldReturnStatus200() throws Exception {
-        Occupation occupation = new Occupation(5L, LocalDateTime.now(), null, 2, PaymentForm.CARTAO_CREDITO, new ArrayList<>(), new Board(), new HashSet<>(), true);
-        Review review = new Review(1l, 5, "comentario", occupation);
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1L, "Comentario", List.of(new TopicReviewRegisterDTO(5, AMBIENTE)));
+        Review review = new Review(dto.occupationId(), dto.comment());
+        review.setId(1l);
+        review.setTopicReviews(dto.items().stream().map(item -> new TopicReview(item.grade(), item.category(), review.getId())).toList());
 
-        ReviewUpdateDTO updatedDto = new ReviewUpdateDTO(4, "novo comentario");
-        when(reviewService.updateReview(1l, updatedDto)).thenReturn(new ReviewRegisterDTO(4, "novo comentario"));
+        ReviewUpdateDTO updatedDto = new ReviewUpdateDTO("novo comentario");
+        when(reviewService.updateReview(1l, updatedDto)).thenReturn(new ReviewRegisterDTO(4l, "novo comentario", null));
 
         ResultActions response = this.mockMvc
                 .perform(MockMvcRequestBuilders.put("/reviews/{id}", 1l)
@@ -241,10 +251,6 @@ class ReviewControllerTest {
                 );
         response
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.grade",
-                        CoreMatchers.is(updatedDto.grade())
-                ))
                 .andExpect(MockMvcResultMatchers.jsonPath(
                         "$.comment",
                         CoreMatchers.is(updatedDto.comment())
@@ -256,7 +262,11 @@ class ReviewControllerTest {
 
     @Test
     public void deleteReview_whenReviewExists_sholdReturnStatus2004() throws Exception {
-        Review review = new Review(1l, 3, "comentario", mock(Occupation.class));
+        ReviewRegisterDTO dto = new ReviewRegisterDTO(1L, "Comentario", List.of(new TopicReviewRegisterDTO(5, AMBIENTE)));
+        Review review = new Review(dto.occupationId(), dto.comment());
+        review.setId(1l);
+        review.setTopicReviews(dto.items().stream().map(item -> new TopicReview(item.grade(), item.category(), review.getId())).toList());
+
 
         ResultActions response = this.mockMvc
                 .perform(MockMvcRequestBuilders.delete("/reviews/{id}", 1l)

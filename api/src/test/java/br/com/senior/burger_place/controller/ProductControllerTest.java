@@ -70,9 +70,7 @@ public class ProductControllerTest {
                 .perform(
                         MockMvcRequestBuilders.get("/products")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .queryParam("page", "0")
-                                .queryParam("size", "10")
-                                .queryParam("category", "BURGER")
+                                .queryParam("category", ProductCategory.BURGER.name())
                 );
 
         response

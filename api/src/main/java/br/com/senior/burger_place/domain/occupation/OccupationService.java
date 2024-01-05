@@ -84,6 +84,10 @@ public class OccupationService {
             throw new IllegalArgumentException("Mesa já está ocupada");
         }
 
+        if (board.getCapacity() < orderData.peopleCount()) {
+            throw new IllegalArgumentException("Quantidade de pessoas excede a capacidade da mesa");
+        }
+
         Occupation occupation = new Occupation(
                 orderData.beginOccupation(),
                 orderData.peopleCount(),
@@ -254,6 +258,10 @@ public class OccupationService {
             throw new EntityNotFoundException("Item não existe ou não pertence a essa ocupação");
         }
 
+        if (item.getStatus() == OrderItemStatus.CANCELADO) {
+            throw new IllegalStateException("O item já está cancelado");
+        }
+
         if (item.getStatus() == OrderItemStatus.EM_ANDAMENTO) {
             throw new IllegalStateException("O item já está sendo preparado");
         }
@@ -275,6 +283,10 @@ public class OccupationService {
             throw new EntityNotFoundException("Item não existe ou não pertence a essa ocupação");
         }
 
+        if (item.getStatus() == OrderItemStatus.CANCELADO) {
+            throw new IllegalStateException("O item já está cancelado");
+        }
+
         if (item.getStatus() == OrderItemStatus.PRONTO) {
             throw new IllegalStateException("O preparo do item já foi finalizado");
         }
@@ -294,6 +306,10 @@ public class OccupationService {
 
         if (item == null) {
             throw new EntityNotFoundException("Item não existe ou não pertence a essa ocupação");
+        }
+
+        if (item.getStatus() == OrderItemStatus.CANCELADO) {
+            throw new IllegalStateException("O item já está cancelado");
         }
 
         if (item.getStatus() == OrderItemStatus.ENTREGUE) {

@@ -12,7 +12,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -77,16 +76,13 @@ public class BoardController {
                 throw new EntityNotFoundException("Não encontrado mesa para a localização: " + location);
             }
         }
-        if (capacity != null && location != null) {
-            try {
-                BoardLocation boardLocation = BoardLocation.valueOf(location.toUpperCase());
-                Page<Board> boards = service.listAvailableBoardsByLocationAndCapacityAndOccupation(boardLocation, capacity, pageable);
-                return ResponseEntity.ok().body(boards.map(ListingBoardDTO::new));
-            } catch (IllegalArgumentException e) {
-                throw new EntityNotFoundException("Não encontrado mesa para a localização: " + location);
-            }
+        try {
+            BoardLocation boardLocation = BoardLocation.valueOf(location.toUpperCase());
+            Page<Board> boards = service.listAvailableBoardsByLocationAndCapacityAndOccupation(boardLocation, capacity, pageable);
+            return ResponseEntity.ok().body(boards.map(ListingBoardDTO::new));
+        } catch (IllegalArgumentException e) {
+            throw new EntityNotFoundException("Não encontrado mesa para a localização: " + location);
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")

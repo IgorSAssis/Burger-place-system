@@ -12,52 +12,59 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 
 @ExtendWith(MockitoExtension.class)
 class ReviewTest {
 
-    @ParameterizedTest
-    @CsvSource({"6", "10", "-1", "1000"})
-    public void Review_whenGradeIsLessThan0OrGreaterThen5_shouldThrowException(int grade){
+    @Test
+    public void Review_whenCommentIsEmpty_shouldNotUpdateTheComment(){
 
-        Long id = 1l;
-        ReviewRegisterDTO dto = new ReviewRegisterDTO(grade, "Comentário");
+        Review review = new Review(1L, "");
+        assertNull(review.getComment());
+        assertNull(review.getId());
+        assertEquals(1L, review.getOccupation().getId());
+    }
+    @Test
+    public void Review_whenTheCommentHasOnlyEmpty_shouldNotUpdateTheComment(){
 
-        assertThrows(NoSuchElementException.class, ()-> new Review(id, dto));
+        Review review = new Review(1L, "               ");
+        assertNull(review.getComment());
+    }
+    @Test
+    public void Review_whenTheCommentDataIsValid_shouldUpdateTheComment(){
+
+        Review review = new Review(1L, "Comentário");
+        assertEquals("Comentário", review.getComment());
     }
 
     @Test
-    public void Review_whenGradeIsValid_shouldSetAttributes(){
-
-        Long occupationId = 1l;
-        ReviewRegisterDTO dto = new ReviewRegisterDTO(4, "Comentário");
-        Review review = new Review(occupationId, dto);
-
-        assertEquals(dto.grade(), review.getGrade());
-        assertEquals(dto.comment(), review.getComment());
-        assertEquals(occupationId, review.getOccupation().getId());
-    }
-
-    @ParameterizedTest
-    @CsvSource({"6", "10", "-1", "1000"})
-    public void updateInformation_whenGradeIsLessThan0OrGreaterThen5_shouldThrowException(int grade){
-        Review review = new Review();
-        ReviewUpdateDTO dto = new ReviewUpdateDTO(grade, "Comentário");
-
-        assertThrows(NoSuchElementException.class, ()-> review.updateInformation(dto));
-    }
-
-    @Test
-    public void updateInformation_whenDataIsNotNull_shouldUpdateData(){
-        Review review = new Review();
-        ReviewUpdateDTO dto = new ReviewUpdateDTO(4, "Comentário");
+    public void updateInformation_whenTheCommentHasOnlyEmpty_shouldNotUpdateTheComment(){
+        Review review = new Review(1L, "Comentário");
+        ReviewUpdateDTO dto = new ReviewUpdateDTO("           ");
 
         review.updateInformation(dto);
 
-        assertEquals(review.getGrade(), dto.grade());
-        assertEquals(review.getComment(), dto.comment());
+        assertEquals("Comentário", review.getComment());
+    }
+    @Test
+    public void updateInformation_whenCommentIsEmpty_shouldNotUpdateTheComment(){
+        Review review = new Review();
+        ReviewUpdateDTO dto = new ReviewUpdateDTO("");
 
+        review.updateInformation(dto);
 
+        assertNull(review.getComment());
+    }
+
+    @Test
+    public void updateInformation_whenTheCommentDataIsValid_shouldUpdateTheComment(){
+
+        Review review = new Review(1L, "Comentário antigo");
+        ReviewUpdateDTO dto = new ReviewUpdateDTO("Novo comentário");
+
+        review.updateInformation(dto);
+        assertEquals("Novo comentário", review.getComment());
     }
 }

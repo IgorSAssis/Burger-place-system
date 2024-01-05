@@ -114,8 +114,11 @@
     </div>
   </div>
 
-  <p class="total-cost">
-    <span>Valor total:</span>
-    <b>{{ getOccupationTotalCost() | currency : "BRL" : "symbol-narrow" }}</b>
-  </p>
+  <div class="menu-footer">
+    <p class="total-cost">
+      <span>Valor total:</span>
+      <b>{{ getOccupationTotalCost() | currency : "BRL" : "symbol-narrow" }}</b>
+    </p>
+    <button (click)="onReview()">Avaliar</button>
+  </div>
 </aside>

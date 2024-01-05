@@ -71,6 +71,19 @@ class CustomerServiceTest {
         assertEquals("Já existe um cliente com o mesmo cpf.", exception.getMessage());
         verify(customerRepository, never()).save(any(Customer.class));
     }
+    @Test
+    public void addCustomer_whenTheCPFHasMoreThan11Digits_shouldThrowException() {
+
+        AdressDto adressDto = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
+        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "999999999001233", adressDto);
+
+        when(customerRepository.existsByCpf(dto.cpf())).thenReturn(false);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> customerService.addCustomer(dto));
+
+        assertEquals("O CPF deve ter 11 dígitos", exception.getMessage());
+        verify(customerRepository, never()).save(any(Customer.class));
+    }
 
     @Test
     public void addCustomer_whenExistsAclientWithSameEmail_shouldThrowException() {

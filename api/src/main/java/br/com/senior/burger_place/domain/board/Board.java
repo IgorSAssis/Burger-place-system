@@ -16,7 +16,7 @@ import lombok.Setter;
 @Entity(name = "Board")
 public class Board {
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer number;
     private Integer capacity;
@@ -32,16 +32,17 @@ public class Board {
     }
 
     public void updateInformation(BoardUpdateDTO data) {
-        if (data.location() != null){
+        if (data.location() != null) {
             this.location = data.location();
         }
-        if (data.capacity() != null){
+        if (data.capacity() != null) {
             this.capacity = data.capacity();
         }
-        if (data.number() != null){
+        if (data.number() != null) {
             this.number = data.number();
         }
     }
+
     public void inactivate() {
         this.active = false;
     }

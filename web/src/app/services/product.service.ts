@@ -10,7 +10,9 @@ export class ProductService {
   constructor() {}
 
   fetchProducts(options?: FetchProductFilters): Observable<ProductListing> {
-    const params: FetchProductFilters = {};
+    const params: FetchProductFilters = {
+      size: 10
+    };
 
     if (options) {
       if (options.category) {
@@ -37,6 +39,7 @@ export class ProductService {
 interface FetchProductFilters {
   page?: number;
   category?: CategoryType;
+  size?: number
 }
 
 export enum Category {

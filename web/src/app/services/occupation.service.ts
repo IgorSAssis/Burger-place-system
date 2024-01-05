@@ -13,9 +13,6 @@ export class OccupationService {
   constructor() {}
 
   createOccupation(dto: CreateOccupationDTO): Observable<number> {
-    console.log('Creating new occupation');
-    console.log(dto);
-
     return from(api.post('occupations', dto)).pipe(
       map((response) => {
         return response.data.id;

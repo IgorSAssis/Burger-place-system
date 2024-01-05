@@ -200,20 +200,46 @@ aside .item .expandable.expanded {
   max-height: 300px;
 }
 
-aside .total-cost {
+aside .menu-footer {
   width: 100%;
-  padding: 0 30px;
   position: absolute;
   bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+aside .menu-footer .total-cost {
+  width: 100%;
+  padding: 0 30px;
+
   display: flex;
   justify-content: space-between;
 }
 
-aside .total-cost span {
+aside .menu-footer .total-cost span {
   font-size: 1.8rem;
 }
 
-aside .total-cost b {
+aside .menu-footer .total-cost b {
   font-size: 1.8rem;
   color: var(--green);
+}
+
+aside .menu-footer > button {
+  width: 80%;
+  padding: 10px 0;
+  font-size: 1.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: var(--green);
+  color: var(--white);
+  border-radius: 8px;
+  border: none;
+  transition: background 0.2s;
+}
+
+aside .menu-footer > button:hover {
+  background-color: var(--green-hover);
 }

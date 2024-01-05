@@ -1,7 +1,7 @@
 CREATE TABLE reviews (
-    id              SERIAL      PRIMARY KEY,
-    grade           INT         NOT NULL,
+    id              SERIAL        PRIMARY KEY,
     comment         VARCHAR(255),
-    occupation_id   BIGINT      NOT NULL,
+    occupation_id   BIGINT        NOT NULL,
+
     FOREIGN KEY (occupation_id) REFERENCES occupations(id)
 );
