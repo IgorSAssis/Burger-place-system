@@ -1,4 +1,4 @@
-# Burger Place App
+# Burger Place System
 
 # :pushpin: Conteúdo
 
