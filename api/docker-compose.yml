@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: burger_place_db
+    environment:
+      POSTGRES_DB: "burger_place"
+      POSTGRES_PASSWORD: "root"
+    ports:
+      - "5432:5432"
+    volumes:
+      - burger_place_data:/var/lib/postgres
+
+volumes:
+  burger_place_data:
