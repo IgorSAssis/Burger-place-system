@@ -11,7 +11,7 @@
 <a name="Sobre"></a>
 # :hamburger: Sobre
 
-O **Burger Place App** é um sistema web que foi construído  com o intuito de integrar todos os fluxos de processo de uma hamburgueria, que envolve desde a abertura da comanda pela parte do cliente até o preparo pelo cozinheiro e a entrega pelo garçom.
+O **Burger Place System** é um sistema web que foi construído  com o intuito de integrar todos os fluxos de processo de uma hamburgueria, que envolve desde a abertura da comanda pela parte do cliente até o preparo pelo cozinheiro e a entrega pelo garçom.
 
 <a name="Tecnologias"></a>
 # :zap: Tecnologias
