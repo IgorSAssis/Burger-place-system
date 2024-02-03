@@ -58,7 +58,7 @@ public class OccupationService {
     public OccupationDTO createOccupation(CreateOccupationDTO orderData) {
         InvalidDTOValidation.validate(orderData);
 
-        if (orderData.boardId() == null || orderData.boardId() <= 0) {
+        if (orderData.boardId() == null) {
             throw new IllegalArgumentException("ID da mesa é inválida");
         }
 

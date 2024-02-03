@@ -7,12 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface OccupationRepository extends JpaRepository<Occupation, Long> {
     Page<Occupation> findAllByActiveTrue(Pageable pageable);
+
     Occupation getReferenceByIdAndActiveTrue(Long id);
+
     boolean existsByIdAndActiveTrue(Long id);
 
-    Occupation findFirstByBoardIdOrderByBeginOccupationDesc(Long boardId);
+    Occupation findFirstByBoardIdOrderByBeginOccupationDesc(UUID boardId);
 }

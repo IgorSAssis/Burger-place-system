@@ -1,49 +1,43 @@
 package br.com.senior.burger_place.domain.board;
 
-import br.com.senior.burger_place.domain.board.dto.BoardRegisterDTO;
-import br.com.senior.burger_place.domain.board.dto.BoardUpdateDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(name = "boards")
 @Entity(name = "Board")
 public class Board {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private Integer number;
     private Integer capacity;
     @Enumerated(EnumType.STRING)
     private BoardLocation location;
-    private boolean active;
+    @Builder.Default
+    private Boolean active = true;
+    @Builder.Default
+    private Boolean occupied = false;
 
-    public Board(BoardRegisterDTO data) {
-        this.active = true;
-        this.number = data.number();
-        this.capacity = data.capacity();
-        this.location = data.location();
-    }
-
-    public void updateInformation(BoardUpdateDTO data) {
-        if (data.location() != null) {
-            this.location = data.location();
+    public void update(
+            BoardLocation newLocation,
+            Integer newCapacity,
+            Integer newBoardNumber
+    ) {
+        if (newLocation != null) {
+            this.location = newLocation;
         }
-        if (data.capacity() != null) {
-            this.capacity = data.capacity();
+        if (newCapacity != null) {
+            this.capacity = newCapacity;
         }
-        if (data.number() != null) {
-            this.number = data.number();
+        if (newBoardNumber != null) {
+            this.number = newBoardNumber;
         }
-    }
-
-    public void inactivate() {
-        this.active = false;
     }
 }

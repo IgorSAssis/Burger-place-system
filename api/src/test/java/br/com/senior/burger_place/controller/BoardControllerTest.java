@@ -1,19 +1,28 @@
 package br.com.senior.burger_place.controller;
 
 import br.com.senior.burger_place.domain.board.Board;
+import br.com.senior.burger_place.domain.board.BoardConverter;
+import br.com.senior.burger_place.domain.board.BoardLocation;
 import br.com.senior.burger_place.domain.board.BoardService;
-import br.com.senior.burger_place.domain.board.dto.BoardRegisterDTO;
-import br.com.senior.burger_place.domain.board.dto.BoardUpdateDTO;
+import br.com.senior.burger_place.domain.board.dto.BoardDTO;
+import br.com.senior.burger_place.domain.board.dto.CreateBoardDTO;
+import br.com.senior.burger_place.domain.board.dto.UpdateBoardDTO;
+import br.com.senior.burger_place.infra.dto.ResponseWithFieldErrors;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -23,17 +32,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
-import static br.com.senior.burger_place.domain.board.BoardLocation.TERRACO;
-import static br.com.senior.burger_place.domain.board.BoardLocation.VARANDA;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.junit.jupiter.api.Assertions.*;
+import static utils.BoardCreator.*;
 
 @WebMvcTest(controllers = {BoardController.class})
 @ExtendWith(MockitoExtension.class)
+@DisplayName("BoardController integration tests")
 class BoardControllerTest {
 
     @Autowired
@@ -42,331 +49,368 @@ class BoardControllerTest {
     private BoardController boardController;
     @MockBean
     private BoardService boardService;
+    @MockBean
+    private BoardConverter boardConverter;
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    public void register_whenRegistrationDataNotIsValid_shouldReturnHttpStatus400() throws Exception {
-        BoardRegisterDTO dto = new BoardRegisterDTO(null, null, null);
+    @Nested
+    @DisplayName("list tests")
+    class ListTest {
+        @Test
+        void list_whenExistBoards_shouldReturnStatus200AndPageWithBoardDTO() throws Exception {
+            List<Board> boards = List.of(createBoard(), createBoard());
+            Page<Board> boardPage = new PageImpl<>(boards, Pageable.ofSize(20), 20);
 
-        ResultActions result = this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/boards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(dto))
-                );
+            mockListBoards(boardPage);
+            mockToBoardDTO(boards.get(0), createBoardDTO());
+            mockToBoardDTO(boards.get(1), createBoardDTO());
 
-        result
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(jsonPath(
-                        "$[0].field",
-                        CoreMatchers.is("capacity"))
-                )
-                .andExpect(jsonPath(
-                        "$[0].message",
-                        CoreMatchers.is("must not be null")
-                ))
-                .andExpect(jsonPath(
-                        "$[1].field",
-                        CoreMatchers.is("location"))
-                )
-                .andExpect(jsonPath(
-                        "$[1].message",
-                        CoreMatchers.is("must not be null")
-                ))
-                .andExpect(jsonPath(
-                        "$[2].field",
-                        CoreMatchers.is("number"))
-                )
-                .andExpect(jsonPath(
-                        "$[2].message",
-                        CoreMatchers.is("must not be null")
-                ))
-                .andDo(MockMvcResultHandlers.print());
+            ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/boards")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .queryParam("number", "1")
+                    .queryParam("capacity", "1")
+                    .queryParam("location", BoardLocation.TERRACO.name())
+                    .queryParam("active", "true")
+                    .queryParam("occupied", "true"));
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.jsonPath(
+                            "$.content.size()",
+                            CoreMatchers.is(boards.size()))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void list_whenBoardsDoNotExist_shouldReturnStatus200AndEmptyPage() throws Exception {
+            Page<Board> boardPage = new PageImpl<>(List.of(), Pageable.ofSize(20), 20);
+
+            mockListBoards(boardPage);
+
+            ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/boards")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .queryParam("number", "1")
+                    .queryParam("capacity", "1")
+                    .queryParam("location", BoardLocation.TERRACO.name())
+                    .queryParam("active", "true")
+                    .queryParam("occupied", "true"));
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.jsonPath(
+                            "$.content.size()",
+                            CoreMatchers.is(boardPage.getContent().size()))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        private void mockListBoards(Page<Board> expectedReturn) {
+            Mockito.when(boardService.listBoards(
+                    Pageable.ofSize(20),
+                    1,
+                    1,
+                    BoardLocation.TERRACO,
+                    true,
+                    true
+            )).thenReturn(expectedReturn);
+        }
     }
 
-    @Test
-    public void register_whenCustomerRegistrationDTOIsValid_shouldReturnStatus201() throws Exception {
-        BoardRegisterDTO dto = new BoardRegisterDTO(1, 3, VARANDA);
+    @Nested
+    @DisplayName("show tests")
+    class ShowTest {
+        @Test
+        void show_whenBoardExists_shouldReturnStatus200AndBoardDTO() throws Exception {
+            Board board = createBoard();
+            BoardDTO boardDTO = createBoardDTO();
+            boardDTO.setId(board.getId());
 
-        Board board = new Board(dto);
-        board.setId(1L);
+            Mockito.when(boardService.showBoard(Mockito.any(UUID.class))).thenReturn(board);
+            mockToBoardDTO(board, boardDTO);
 
-        when(boardService.addBoard(dto)).thenReturn(board);
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/boards/{id}", board.getId())
+                            .contentType(MediaType.APPLICATION_JSON));
 
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/boards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(dto))
-                );
-        String expectedLocation = String.format("http://localhost/boards/%d", 1L);
+            response
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(result -> {
 
-        response
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(result -> {
-                    assertTrue(result.getResponse().containsHeader("Location"));
-                })
-                .andExpect(result -> {
-                    Assertions.assertEquals(
-                            expectedLocation,
-                            result.getResponse().getHeader("Location")
-                    );
-                })
-                .andExpect(result -> {
-                    Assertions.assertEquals(expectedLocation,
-                            result.getResponse().getRedirectedUrl());
-                })
-                .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.id",
-                        CoreMatchers.is(board.getId().intValue())
-                ))
-                .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.number",
-                        CoreMatchers.is(board.getNumber())
-                ))
-                .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.capacity",
-                        CoreMatchers.is(board.getCapacity())
-                ))
-                .andExpect(MockMvcResultMatchers.jsonPath(
-                        "$.location",
-                        CoreMatchers.is(board.getLocation().toString())
-                ))
-                .andDo(MockMvcResultHandlers.print());
+                        BoardDTO output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                BoardDTO.class
+                        );
 
-        verify(boardService, times(1)).addBoard(dto);
+                        assertEquals(boardDTO, output);
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
     }
 
-    @Test
-    public void updateBoard_whenDtoIsValid_shouldReturnStatus200() throws Exception {
-        Board board = new Board(1l, 3, 4, VARANDA, true);
-        BoardUpdateDTO updatedDto = new BoardUpdateDTO(3, 6, VARANDA);
+    @Nested
+    @DisplayName("create tests")
+    class CreateTest {
+        @ParameterizedTest
+        @CsvSource({
+                ",Board number cannot be null",
+                "0,Board number cannot be zero or negative",
+                "-1,Board number cannot be zero or negative",
+                "-10,Board number cannot be zero or negative",
+        })
+        void create_whenDTOBoardNumberIsInvalid_shouldReturnStatus400WithError(Integer boardNumber, String expectedErrorMessage) throws Exception {
+            String field = "boardNumber";
+            CreateBoardDTO createBoardDTO = createCreateBoardDTO();
+            createBoardDTO.setBoardNumber(boardNumber);
 
-        when(boardService.listBoardsById(1l)).thenReturn(board);
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/boards")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(createBoardDTO))
+            );
 
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.put("/boards/{id}", 1l)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(updatedDto))
-                );
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(result -> {
+                        ResponseWithFieldErrors output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                ResponseWithFieldErrors.class
+                        );
 
-        response
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcResultHandlers.print());
-        verify(boardService, times(1)).listBoardsById(1l);
-        verify(boardService, times(1)).updateBoard(1l, updatedDto);
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(1, output.getErrors().size()),
+                                () -> assertEquals(field, output.getErrors().get(0).getField()),
+                                () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
 
+        @ParameterizedTest
+        @CsvSource({
+                ",Board capacity cannot be null",
+                "0,Board capacity cannot be zero or negative",
+                "-1,Board capacity cannot be zero or negative",
+                "-10,Board capacity cannot be zero or negative",
+        })
+        void create_whenDTOCapacityIsInvalid_shouldReturnStatus400WithError(Integer capacity, String expectedErrorMessage) throws Exception {
+            String field = "capacity";
+            CreateBoardDTO createBoardDTO = createCreateBoardDTO();
+            createBoardDTO.setCapacity(capacity);
 
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/boards")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(createBoardDTO))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(result -> {
+                        ResponseWithFieldErrors output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                ResponseWithFieldErrors.class
+                        );
+
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(1, output.getErrors().size()),
+                                () -> assertEquals(field, output.getErrors().get(0).getField()),
+                                () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void create_whenDTOBoardLocationIsInvalid_shouldReturnStatus400WithError() throws Exception {
+            String field = "boardLocation";
+            String expectedErrorMessage = "Board location cannot be null";
+
+            CreateBoardDTO createBoardDTO = createCreateBoardDTO();
+            createBoardDTO.setBoardLocation(null);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/boards")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(createBoardDTO))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(result -> {
+                        ResponseWithFieldErrors output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                ResponseWithFieldErrors.class
+                        );
+
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(1, output.getErrors().size()),
+                                () -> assertEquals(field, output.getErrors().get(0).getField()),
+                                () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+        @Test
+        void create_whenDTOIsValid_shouldReturnStatus201WithBoardDTOAndLocation() throws Exception {
+            CreateBoardDTO createBoardDTO = createCreateBoardDTO();
+            Board board = createBoard();
+            BoardDTO boardDTO = createBoardDTO();
+            boardDTO.setId(board.getId());
+
+            String expectedCreatedResource = String.format("/boards/%s", board.getId().toString());
+
+            Mockito.when(boardService.createBoard(Mockito.any(CreateBoardDTO.class))).thenReturn(board);
+            mockToBoardDTO(board, boardDTO);
+
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/boards")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(createBoardDTO))
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isCreated())
+                    .andExpect(result -> {
+                        BoardDTO output = objectMapper.readValue(result.getResponse().getContentAsString(), BoardDTO.class);
+
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(boardDTO, output),
+                                () -> assertNotNull(result.getResponse().getRedirectedUrl()),
+                                () -> assertTrue(result.getResponse().getRedirectedUrl().contains(expectedCreatedResource))
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
     }
 
-    @Test
-    public void listBoardById_whenExistBoard_shouldReturnStatus200WithBoard() throws Exception {
-        Board board = new Board(1l, 7, 2, TERRACO, true);
-        when(boardService.listBoardsById(1l)).thenReturn(board);
+    @Nested
+    @DisplayName("update tests")
+    class UpdateTest {
+        @ParameterizedTest
+        @ValueSource(ints = {0, -1})
+        void update_whenDTOBoardNumberIsNegativeOrZero_shouldReturnStatus400WithError(Integer boardNumber) throws Exception {
+            String field = "boardNumber";
+            String expectedErrorMessage = "Board number cannot be zero or negative";
 
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards/{id}", 1l)
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
-        response
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(result -> {
-                    Board responseResult = this.objectMapper.readValue(
-                            result.getResponse().getContentAsString(),
-                            Board.class);
+            UpdateBoardDTO updateBoardDTO = createUpdateBoardDTO();
+            updateBoardDTO.setBoardNumber(boardNumber);
 
-                    Assertions.assertEquals(board.getCapacity(), responseResult.getCapacity());
-                    Assertions.assertEquals(board.getLocation(), responseResult.getLocation());
-                    Assertions.assertEquals(board.getNumber(), responseResult.getNumber());
-                })
-                .andDo(MockMvcResultHandlers.print());
-        verify(boardService, times(1)).listBoardsById(1l);
-    }
-    @Test
-    public void listBoardById_whenBoardDoesNotExist_shouldReturnStatus404() throws Exception {
-        when(boardService.listBoardsById(1l)).thenThrow(new EntityNotFoundException("Mesa não existe"));
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.put("/boards/{id}", UUID.randomUUID().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(updateBoardDTO))
+            );
 
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards/{id}", 1l)
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(result -> {
+                        ResponseWithFieldErrors output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                ResponseWithFieldErrors.class
+                        );
 
-        response
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.isEmptyOrNullString())))
-                        .andDo(MockMvcResultHandlers.print());
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(1, output.getErrors().size()),
+                                () -> assertEquals(field, output.getErrors().get(0).getField()),
+                                () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
 
-                    verify(boardService, times(1)).listBoardsById(1l);
-    }
-    @Test
-    public void listBoards_whenExistBoards_shouldReturnStatus200WithAllBoards() throws Exception {
-        Board board1 = new Board(new BoardRegisterDTO(1, 3, VARANDA));
-        Board board2 = new Board(new BoardRegisterDTO(2, 4, TERRACO));
+        @ParameterizedTest
+        @ValueSource(ints = {0, -1})
+        void update_whenDTOCapacityIsNegativeOrZero_shouldReturnStatus400WithError(Integer capacity) throws Exception {
+            String field = "capacity";
+            String expectedErrorMessage = "Board capacity cannot be zero or negative";
 
-        PageImpl<Board> somePage = new PageImpl<>(
-                Arrays.asList(
-                        board1,
-                        board2
-                ),
-                Pageable.ofSize(10), 10);
+            UpdateBoardDTO updateBoardDTO = createUpdateBoardDTO();
+            updateBoardDTO.setCapacity(capacity);
 
-        when(boardService.listAllBoards(any(Pageable.class))).thenReturn(somePage);
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.put("/boards/{id}", UUID.randomUUID().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(updateBoardDTO))
+            );
 
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
-        response
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content.size()", CoreMatchers.is(2)))
-                .andDo(MockMvcResultHandlers.print());
-        verify(boardService, times(1)).listAllBoards(any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByCapacityAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndCapacityAndOccupation(any(), any(), any(Pageable.class));
-    }
+            response
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(result -> {
+                        ResponseWithFieldErrors output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                ResponseWithFieldErrors.class
+                        );
 
-    @Test
-    public void listBoards_whenExistBoards_shouldReturnStatus200WithAllBoardsWithCapacity4() throws Exception {
-        Board board1 = new Board(new BoardRegisterDTO(1, 4, VARANDA));
-        Board board2 = new Board(new BoardRegisterDTO(2, 4, TERRACO));
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(1, output.getErrors().size()),
+                                () -> assertEquals(field, output.getErrors().get(0).getField()),
+                                () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
 
-        PageImpl<Board> somePage = new PageImpl<>(
-                Arrays.asList(
-                        board1,
-                        board2
-                ),
-                Pageable.ofSize(10), 10);
+        @Test
+        void update_whenDTOIsValid_shouldReturnStatus200WithBoardDTO() throws Exception {
+            UpdateBoardDTO updateBoardDTO = createUpdateBoardDTO();
+            Board board = createBoard();
+            BoardDTO boardDTO = createBoardDTO();
+            boardDTO.setId(board.getId());
 
-        when(boardService.listAvailableBoardsByCapacityAndOccupation(eq(4), any(Pageable.class))).thenReturn(somePage);
+            Mockito.when(
+                    boardService.updateBoard(Mockito.any(UUID.class), Mockito.any(UpdateBoardDTO.class))
+            ).thenReturn(board);
+            mockToBoardDTO(board, boardDTO);
 
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards")
-                        .param("capacity", "4")
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
-        response
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content.size()", CoreMatchers.is(2)))
-                .andDo(MockMvcResultHandlers.print());
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.put("/boards/{id}", UUID.randomUUID().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(updateBoardDTO))
+            );
 
-        verify(boardService, times(1)).listAvailableBoardsByCapacityAndOccupation(eq(4), any(Pageable.class));
-        verify(boardService, never()).listAllBoards(any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndCapacityAndOccupation(any(), any(), any(Pageable.class));
-    }
+            response
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(result -> {
+                        BoardDTO output = objectMapper.readValue(
+                                result.getResponse().getContentAsString(),
+                                BoardDTO.class
+                        );
 
-    @Test
-    public void listBoards_whenExistBoards_shouldReturnStatus200WithAllBoardsWithLocationVARANDA() throws Exception {
-        Board board1 = new Board(new BoardRegisterDTO(1, 4, VARANDA));
-        Board board2 = new Board(new BoardRegisterDTO(2, 3, VARANDA));
-
-        PageImpl<Board> somePage = new PageImpl<>(
-                Arrays.asList(
-                        board1,
-                        board2
-                ),
-                Pageable.ofSize(10), 10);
-
-        when(boardService.listAvailableBoardsByLocationAndOccupation(eq(VARANDA), any(Pageable.class))).thenReturn(somePage);
-
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards")
-                        .param("location", "varanda")
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
-        response
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content.size()", CoreMatchers.is(2)))
-                .andDo(MockMvcResultHandlers.print());
-
-        verify(boardService, times(1)).listAvailableBoardsByLocationAndOccupation(eq(VARANDA), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByCapacityAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAllBoards(any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndCapacityAndOccupation(any(), any(), any(Pageable.class));
+                        assertAll(
+                                () -> assertNotNull(output),
+                                () -> assertEquals(boardDTO, output)
+                        );
+                    })
+                    .andDo(MockMvcResultHandlers.print());
+        }
     }
 
-    @Test
-    public void listBoards_whenExistBoardsByLocationAndOccupationNotIsValid_shouldReturnStatus404() throws Exception {
-        when(boardService.listAvailableBoardsByLocationAndOccupation(any(), any(Pageable.class))).thenThrow(IllegalArgumentException.class);
+    @Nested
+    @DisplayName("inactivate tests")
+    class InactivateTest {
+        @Test
+        void inactivate_whenCalled_shouldReturnStatus204() throws Exception {
+            ResultActions response = mockMvc.perform(
+                    MockMvcRequestBuilders.delete("/boards/{id}", UUID.randomUUID().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards")
-                        .param("location", "varanda")
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
-
-        verify(boardService, times(1)).listAvailableBoardsByLocationAndOccupation(eq(VARANDA), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByCapacityAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAllBoards(any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndCapacityAndOccupation(any(), any(), any(Pageable.class));
+            response
+                    .andExpect(MockMvcResultMatchers.status().isNoContent())
+                    .andDo(MockMvcResultHandlers.print());
+        }
     }
 
-    @Test
-    public void listBoards_whenExistBoards_shouldReturnStatus200WithAllBoardsWithLocationVARANDAAndCapacity4() throws Exception {
-        Board board1 = new Board(new BoardRegisterDTO(1, 4, VARANDA));
-        Board board2 = new Board(new BoardRegisterDTO(2, 4, VARANDA));
-
-        PageImpl<Board> somePage = new PageImpl<>(
-                Arrays.asList(
-                        board1,
-                        board2
-                ),
-                Pageable.ofSize(10), 10);
-
-        when(boardService.listAvailableBoardsByLocationAndCapacityAndOccupation(eq(VARANDA), eq(4), any(Pageable.class))).thenReturn(somePage);
-
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards")
-                        .param("location", "varanda")
-                        .param("capacity", "4")
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
-        response
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content.size()", CoreMatchers.is(2)))
-                .andDo(MockMvcResultHandlers.print());
-
-        verify(boardService, times(1)).listAvailableBoardsByLocationAndCapacityAndOccupation(eq(VARANDA), eq(4), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByCapacityAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAllBoards(any(Pageable.class));
+    private void mockToBoardDTO(Board board, BoardDTO expectedReturn) {
+        Mockito.when(boardConverter.toBoardDTO(board)).thenReturn(expectedReturn);
     }
-
-    @Test
-    public void listBoards_whenExistBoardsByLocationAndCapacityAndOccupationNotIsValid_shouldReturnStatus404() throws Exception {
-        when(boardService.listAvailableBoardsByLocationAndCapacityAndOccupation(any(), any(), any(Pageable.class))).thenThrow(IllegalArgumentException.class);
-
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/boards")
-                        .param("location", "varanda")
-                        .param("capacity", "4")
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
-
-        verify(boardService, times(1)).listAvailableBoardsByLocationAndCapacityAndOccupation(any(), any(), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByLocationAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAvailableBoardsByCapacityAndOccupation(any(), any(Pageable.class));
-        verify(boardService, never()).listAllBoards(any(Pageable.class));
-    }
-
-    @Test
-    public void deleteBoard_whenBoardExistsAndIsActive_sholdReturnStatus2004() throws Exception {
-        Board board = new Board(1l, 4, 4, TERRACO, true);
-        when(boardService.listBoardsById(1l)).thenReturn(board);
-
-        ResultActions response = this.mockMvc
-                .perform(MockMvcRequestBuilders.delete("/boards/{id}", 1l)
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
-        response
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
-                .andDo(MockMvcResultHandlers.print());
-        verify(boardService, times(1)).listBoardsById(1l);
-        Assertions.assertFalse(board.isActive());
-    }
-
 }

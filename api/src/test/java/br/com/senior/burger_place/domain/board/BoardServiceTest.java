@@ -1,260 +1,385 @@
 package br.com.senior.burger_place.domain.board;
 
-import br.com.senior.burger_place.domain.board.dto.BoardRegisterDTO;
-import br.com.senior.burger_place.domain.board.dto.BoardUpdateDTO;
-import br.com.senior.burger_place.domain.occupation.Occupation;
-import br.com.senior.burger_place.domain.occupation.OccupationRepository;
+import br.com.senior.burger_place.domain.board.dto.CreateBoardDTO;
+import br.com.senior.burger_place.domain.board.dto.UpdateBoardDTO;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import static br.com.senior.burger_place.domain.board.BoardLocation.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
+import static utils.BoardCreator.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("BoardService unit tests")
 class BoardServiceTest {
-
     @InjectMocks
     private BoardService boardService;
     @Mock
-    private BoardRepository boardRepository;
+    private BoardRepository boardRepositoryMocked;
     @Mock
-    private OccupationRepository occupationRepository;
-    @Captor
-    private ArgumentCaptor<Board> boardCaptor;
-    @Captor
-    private ArgumentCaptor<BoardUpdateDTO> boardUpdateDTOCaptor;
-    @Captor
-    private ArgumentCaptor<Pageable> pageableCaptor;
-    @Captor
-    private ArgumentCaptor<BoardLocation> boardLocationCaptor;
+    private BoardSpecification boardSpecificationMocked;
 
-    @Test
-    public void addBoard_whenExistsBoardWithSameNumber_shouldThrowException() {
-        BoardRegisterDTO dto = new BoardRegisterDTO(2, 4, VARANDA);
+    @Nested
+    @DisplayName("listBoards tests")
+    class ListBoardsTest {
+        @Test
+        void listBoards_whenExistBoards_shouldReturnPageWithBoards() {
+            List<Board> boards = List.of(createBoard());
+            Page<Board> boardsPage = new PageImpl<>(boards, Pageable.ofSize(20), 20);
 
-        when(boardRepository.existsByNumber(dto.number())).thenReturn(false);
+            when(boardSpecificationMocked.applyFilters(null, null, null, null, null))
+                    .thenReturn(Specification.where(null));
+            when(boardRepositoryMocked.findAll(eq(Specification.where(null)), any(Pageable.class))).thenReturn(boardsPage);
 
-        boardService.addBoard(dto);
-        verify(boardRepository, times(1)).save(boardCaptor.capture());
+            List<Board> output = boardService.listBoards(
+                    boardsPage.getPageable(), null, null, null, null, null
+            ).toList();
 
-        Board boardCaptured = boardCaptor.getValue();
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(1, output.size()),
+                    () -> assertEquals(boards.get(0), output.get(0))
+            );
+        }
 
-        assertEquals(dto.number(), boardCaptured.getNumber());
-        assertEquals(dto.capacity(), boardCaptured.getCapacity());
-        assertEquals(dto.location(), boardCaptured.getLocation());
+        @Test
+        void listBoards_whenDoNotExistBoards_shouldReturnEmptyPage() {
+            Page<Board> boardsPage = new PageImpl<>(List.of(), Pageable.ofSize(20), 20);
+
+            when(boardSpecificationMocked.applyFilters(null, null, null, null, null))
+                    .thenReturn(Specification.where(null));
+            when(boardRepositoryMocked.findAll(eq(Specification.where(null)), any(Pageable.class))).thenReturn(boardsPage);
+
+            List<Board> output = boardService.listBoards(
+                    boardsPage.getPageable(), null, null, null, null, null
+            ).toList();
+
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertTrue(output.isEmpty())
+            );
+
+        }
     }
 
-    @Test
-    public void addBoard_whenNotExistsBoardWithSameNumber_shouldSaveBoard() {
-        BoardRegisterDTO dto = new BoardRegisterDTO(2, 4, VARANDA);
-        Board board = new Board(dto);
+    @Nested
+    @DisplayName("showBoard tests")
+    class ShowBoardTest {
+        @Test
+        void showBoard_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(IllegalArgumentException.class, () -> boardService.showBoard(null));
+        }
 
-        when(boardRepository.existsByNumber(dto.number())).thenReturn(true);
+        @Test
+        void showBoard_whenBoardDoesNotExist_shouldThrowEntityNotFoundException() {
+            String expectedErrorMessage = "Board does not exist";
 
-        DuplicateKeyException exception = assertThrows(DuplicateKeyException.class, () -> boardService.addBoard(dto));
-        assertEquals("Já existe uma mesa cadastrada com esse número", exception.getMessage());
+            mockFindById(null);
 
-        verify(boardRepository, never()).save(board);
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class, () -> boardService.showBoard(UUID.randomUUID())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void showBoard_whenBoardExists_shouldReturnBoardDTO() {
+            Board board = createBoard();
+
+            mockFindById(board);
+
+            Board output = boardService.showBoard(UUID.randomUUID());
+
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(board, output)
+            );
+        }
+
+        private void mockFindById(Board board) {
+            when(boardRepositoryMocked.findById(any(UUID.class))).thenReturn(Optional.ofNullable(board));
+        }
     }
 
-    @Test
-    public void updateBoard_whenOptionalBoardIsNull_shouldThrowException() {
-        Long boardId = 1l;
-        BoardUpdateDTO boardUpdateDTO = new BoardUpdateDTO(2, 5, SACADA);
+    @Nested
+    @DisplayName("createBoard tests")
+    class CreateBoardTest {
 
-        when(boardRepository.findById(boardId)).thenReturn(Optional.empty());
+        @Captor
+        private ArgumentCaptor<Board> boardArgumentCaptor;
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> boardService.updateBoard(boardId, boardUpdateDTO));
-        assertEquals("Mesa não cadastrada", exception.getMessage());
+        @Test
+        void createBoard_whenDTOIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class, () -> boardService.createBoard(null)
+            );
+        }
+
+        @Test
+        void createBoard_whenBoardNumberAlreadyExists_shouldThrowDuplicateKeyException() {
+            String expectedErrorMessage = "Board with number already exists";
+            CreateBoardDTO createBoardDTO = createCreateBoardDTO();
+
+            mockExistsByNumberAndActiveTrue(true);
+
+            DuplicateKeyException exception = assertThrows(
+                    DuplicateKeyException.class, () -> boardService.createBoard(createBoardDTO)
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void createBoard_whenBoardDoesNotExist_shouldSaveAndReturnBoardDTO() {
+            CreateBoardDTO createBoardDTO = createCreateBoardDTO();
+
+            mockExistsByNumberAndActiveTrue(false);
+
+            boardService.createBoard(createBoardDTO);
+            verify(boardRepositoryMocked, times(1)).save(boardArgumentCaptor.capture());
+
+            Board board = this.boardArgumentCaptor.getValue();
+
+            assertAll(
+                    () -> assertNotNull(board),
+                    () -> assertEquals(createBoardDTO.getBoardNumber(), board.getNumber()),
+                    () -> assertEquals(createBoardDTO.getBoardLocation(), board.getLocation()),
+                    () -> assertEquals(createBoardDTO.getCapacity(), board.getCapacity()),
+                    () -> assertTrue(board.getActive())
+            );
+        }
+
+        private void mockExistsByNumberAndActiveTrue(Boolean expectedReturn) {
+            when(boardRepositoryMocked.existsByNumberAndActiveTrue(anyInt())).thenReturn(expectedReturn);
+        }
     }
 
-    @Test
-    public void updateBoard_whenOptionalBoardIsValid_shouldCalledUpdateInformationMethod() {
-        Long boardId = 1L;
-        BoardUpdateDTO boardUpdateDTO = new BoardUpdateDTO(2, 5, SACADA);
-        Board existingBoard = mock(Board.class);
+    @Nested
+    @DisplayName("updateBoard tests")
+    class UpdateBoardTest {
 
-        Optional<Board> optionalBoard = Optional.of(existingBoard);
-        when(boardRepository.findById(boardId)).thenReturn(optionalBoard);
+        @Test
+        void updateBoard_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.updateBoard(null, null)
+            );
+        }
 
-        boardService.updateBoard(boardId, boardUpdateDTO);
+        @Test
+        void updateBoard_whenDTOIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.updateBoard(UUID.randomUUID(), null)
+            );
+        }
 
-        verify(existingBoard, times(1)).updateInformation(boardUpdateDTOCaptor.capture());
+        @Test
+        void updateBoard_whenBoardDoesNotExistsOrIsInactive_shouldThrowEntityNotFoundException() {
+            String expectedErrorMessage = "Board does not exists or is inactive";
 
-        BoardUpdateDTO capturedData = boardUpdateDTOCaptor.getValue();
+            mockFindByIdAndActiveTrue(null);
 
-        assertEquals(boardUpdateDTO.number(), capturedData.number());
-        assertEquals(boardUpdateDTO.capacity(), capturedData.capacity());
-        assertEquals(boardUpdateDTO.location(), capturedData.location());
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
+                    () -> boardService.updateBoard(UUID.randomUUID(), createUpdateBoardDTO())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void updateBoard_whenBoardIsOccupied_shouldThrowIllegalStateException() {
+            String expectedErrorMessage = "Cannot update occupied board";
+            Board board = createBoard();
+            board.setOccupied(true);
+
+            mockFindByIdAndActiveTrue(board);
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> boardService.updateBoard(UUID.randomUUID(), createUpdateBoardDTO())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void updateBoard_whenBoardNumberIsInUse_shouldThrowIllegalArgumentException() {
+            String expectedErrorMessage = "Board number unavailable";
+            Board board = createBoard();
+
+            mockFindByIdAndActiveTrue(board);
+            mockExistsByNumberAndActiveTrueAndIdNot(true);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.updateBoard(UUID.randomUUID(), createUpdateBoardDTO())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void updateBoard_whenCalledWithValidArguments_shouldUpdateBoard() {
+            UpdateBoardDTO updateBoardDTO = createUpdateBoardDTO();
+            Board boardSpy = spy(createBoard());
+
+            mockFindByIdAndActiveTrue(boardSpy);
+            mockExistsByNumberAndActiveTrueAndIdNot(false);
+
+            Board output = boardService.updateBoard(UUID.randomUUID(), updateBoardDTO);
+
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(updateBoardDTO.getBoardNumber(), output.getNumber()),
+                    () -> assertEquals(updateBoardDTO.getBoardLocation(), output.getLocation()),
+                    () -> assertEquals(updateBoardDTO.getCapacity(), output.getCapacity())
+            );
+            verify(boardSpy, times(1)).update(
+                    updateBoardDTO.getBoardLocation(),
+                    updateBoardDTO.getCapacity(),
+                    updateBoardDTO.getBoardNumber()
+            );
+        }
+
+        private void mockFindByIdAndActiveTrue(Board expectedReturn) {
+            when(boardRepositoryMocked.findByIdAndActiveTrue(any(UUID.class))).thenReturn(Optional.ofNullable(expectedReturn));
+        }
+
+        private void mockExistsByNumberAndActiveTrueAndIdNot(Boolean expectedReturn) {
+            when(boardRepositoryMocked.existsByNumberAndActiveTrueAndIdNot(anyInt(), any(UUID.class)))
+                    .thenReturn(expectedReturn);
+        }
     }
 
-    @Test
-    public void listBoardsById_whenBoardIsNull_shouldThrowException() {
-        Long boardId = 1l;
+    @Nested
+    @DisplayName("inactivateBoard tests")
+    class InactivateBoardTest {
 
-        when(boardRepository.getReferenceByIdAndActiveTrue(boardId)).thenReturn(null);
+        @Test
+        void inactivateBoard_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.inactivateBoard(null)
+            );
+        }
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> boardService.listBoardsById(boardId));
-        assertEquals("Mesa não existe", exception.getMessage());
+        @Test
+        void inactivateBoard_whenBoardDoesNotExist_shouldThrowIllegalArgumentException() {
+            String expectedErrorMessage = "Board does not exist or is already inactive";
+
+            mockExistsByIdAndActiveTrue(false);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.inactivateBoard(UUID.randomUUID())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void inactivateBoard_whenBoardExists_shouldInactivateBoard() {
+            mockExistsByIdAndActiveTrue(true);
+
+            boardService.inactivateBoard(UUID.randomUUID());
+
+            verify(boardRepositoryMocked, times(1)).inactivateBoardById(any(UUID.class));
+        }
     }
 
-    @Test
-    public void listBoardsById_whenBoardIsValid_shouldReturnBoard() {
-        Long boardId = 1l;
-        BoardRegisterDTO dto = new BoardRegisterDTO(2, 5, TERRACO);
-        Board board = new Board(dto);
+    @Nested
+    @DisplayName("occupyBoard tests")
+    class OccupyBoardTest {
+        @Test
+        void occupyBoard_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.occupyBoard(null)
+            );
+        }
 
-        when(boardRepository.getReferenceByIdAndActiveTrue(boardId)).thenReturn(board);
+        @Test
+        void occupyBoard_whenBoardDoesNotExist_shouldThrowIllegalArgumentException() {
+            String expectedErrorMessage = "Board does not exist or is already inactive";
 
-        Board result = boardService.listBoardsById(boardId);
-        assertEquals(board, result);
+            mockExistsByIdAndActiveTrue(false);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.occupyBoard(UUID.randomUUID())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void occupyBoard_whenBoardExists_shouldOccupyBoard() {
+            mockExistsByIdAndActiveTrue(true);
+
+            boardService.occupyBoard(UUID.randomUUID());
+
+            verify(boardRepositoryMocked, times(1)).updateBoardOccupied(any(UUID.class), eq(true));
+        }
     }
 
-    @Test
-    public void verifyOccupiedBoard_whenBoardIsOccupied_shouldThrowException() {
-        Long boardId = 1l;
-        Board board = mock(Board.class);
+    @Nested
+    @DisplayName("vacateBoard tests")
+    class VacateBoardTest {
+        @Test
+        void vacateBoard_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.vacateBoard(null)
+            );
+        }
 
-        when(boardRepository.getReferenceByIdAndActiveTrue(boardId)).thenReturn(board);
-        when(boardRepository.isBoardOccupied(boardId)).thenReturn(true);
+        @Test
+        void vacateBoard_whenBoardDoesNotExist_shouldThrowIllegalArgumentException() {
+            String expectedErrorMessage = "Board does not exist or is already inactive";
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> boardService.verifyOccupiedBoard(boardId));
-        assertEquals("A mesa já está ocupada", exception.getMessage());
-        verify(boardRepository, times(1)).getReferenceByIdAndActiveTrue(boardId);
+            mockExistsByIdAndActiveTrue(false);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> boardService.vacateBoard(UUID.randomUUID())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void vacateBoard_whenBoardExists_shouldOccupyBoard() {
+            mockExistsByIdAndActiveTrue(true);
+
+            boardService.vacateBoard(UUID.randomUUID());
+
+            verify(boardRepositoryMocked, times(1)).updateBoardOccupied(any(UUID.class), eq(false));
+        }
     }
 
-    @Test
-    public void verifyOccupiedBoard_whenBoardNotIsOccupied_shouldReturnBoard() {
-        Long boardId = 1l;
-        BoardRegisterDTO dto = new BoardRegisterDTO(3, 3, AREA_INTERNA);
-        Board board = new Board(dto);
-
-        when(boardRepository.getReferenceByIdAndActiveTrue(boardId)).thenReturn(board);
-        when(boardRepository.isBoardOccupied(boardId)).thenReturn(false);
-
-        Board result = boardService.verifyOccupiedBoard(boardId);
-
-        assertEquals(board, result);
-        verify(boardRepository, times(1)).getReferenceByIdAndActiveTrue(boardId);
+    private void mockExistsByIdAndActiveTrue(Boolean expectedReturn) {
+        when(boardRepositoryMocked.existsByIdAndActiveTrue(any(UUID.class))).thenReturn(expectedReturn);
     }
-
-    @Test
-    public void listAllBoards_shouldReturnAllBoardsAvailable() {
-        Pageable pageable = Pageable.unpaged();
-
-        boardService.listAllBoards(pageable);
-
-        verify(boardRepository, times(1)).findAllBoardsAvailable(pageableCaptor.capture());
-        assertEquals(pageable, pageableCaptor.getValue());
-    }
-
-    @Test
-    public void listAvailableBoardsByLocationAndOccupation_whenBoardsIsEmpty_shouldThrowException() {
-        BoardLocation location = VARANDA;
-        Pageable pageable = Pageable.unpaged();
-
-        when(boardRepository.findByLocationAndActiveTrue(location, pageable)).thenReturn(Page.empty());
-
-        Page<Board> output = boardService.listAvailableBoardsByLocationAndOccupation(location, pageable);
-        assertEquals(0, output.getSize());
-        verify(boardRepository, times(1)).findByLocationAndActiveTrue(location, pageable);
-    }
-
-    @Test
-    public void listAvailableBoardsByLocationAndOccupation_whenBoardsIsNotEmpty_shouldReturnBoardsPage() {
-        BoardLocation location = VARANDA;
-        Pageable pageable = Pageable.unpaged();
-        Board board1 = new Board(mock(BoardRegisterDTO.class));
-        Board board2 = new Board(mock(BoardRegisterDTO.class));
-
-        List<Board> boarsList = Arrays.asList(board1, board2);
-        Page<Board> boardPage = new PageImpl<>(boarsList);
-
-        when(boardRepository.findByLocationAndActiveTrue(boardLocationCaptor.capture(), pageableCaptor.capture())).thenReturn(boardPage);
-
-        Page<Board> result = boardService.listAvailableBoardsByLocationAndOccupation(location, pageable);
-
-        assertEquals(boardPage, result);
-        assertEquals(location, boardLocationCaptor.getValue());
-        assertEquals(pageable, pageableCaptor.getValue());
-
-        verify(boardRepository, times(1)).findByLocationAndActiveTrue(location, pageable);
-    }
-
-    @Test
-    public void listAvailableBoardsByCapacityAndOccupation_whenAllBoardsIsValid_shouldReturnBoardsPage() {
-        Pageable pageable = Pageable.unpaged();
-        BoardRegisterDTO dto1 = new BoardRegisterDTO(1, 3, VARANDA);
-        BoardRegisterDTO dto2 = new BoardRegisterDTO(2, 3, TERRACO);
-        BoardRegisterDTO dto3 = new BoardRegisterDTO(3, 3, VARANDA);
-        Board board1 = new Board(dto1);
-        Board board2 = new Board(dto2);
-        Board board3 = new Board(dto3);
-
-        List<Board> boarsList = Arrays.asList(board1, board2, board3);
-        Page<Board> boardPage = new PageImpl<>(boarsList);
-        when(boardRepository.findByCapacityAndActiveTrue(3, pageable)).thenReturn(boardPage);
-
-        Page<Board> result = boardService.listAvailableBoardsByCapacityAndOccupation(3, pageable);
-
-        assertEquals(3, result.getTotalElements());
-
-        verify(boardRepository, times(1)).findByCapacityAndActiveTrue(3, pageable);
-        verify(occupationRepository, times(3)).findFirstByBoardIdOrderByBeginOccupationDesc(any());
-    }
-
-    @Test
-    public void listAvailableBoardsByCapacityAndOccupation_whenBoardsIsEmpty_shouldThrowException() {
-        Pageable pageable = Pageable.unpaged();
-
-        when(boardRepository.findByCapacityAndActiveTrue(4, pageable)).thenReturn(Page.empty());
-
-        Page<Board> output = boardService.listAvailableBoardsByCapacityAndOccupation(4, pageable);
-        assertEquals(0, output.getSize());
-        verify(boardRepository, times(1)).findByCapacityAndActiveTrue(4, pageable);
-    }
-
-    @Test
-    public void listAvailableBoardsByLocationAndCapacityAndOccupation_whenBoardsIsEmpty_shouldThrowException() {
-        Pageable pageable = Pageable.unpaged();
-
-        when(boardRepository.findByLocationAndCapacityAndActiveTrue(VARANDA, 4, pageable)).thenReturn(Page.empty());
-
-        Page<Board> output = boardService.listAvailableBoardsByLocationAndCapacityAndOccupation(VARANDA, 4, pageable);
-        assertEquals(0, output.getSize());
-        verify(boardRepository, times(1)).findByLocationAndCapacityAndActiveTrue(VARANDA, 4, pageable);
-    }
-
-    @Test
-    public void listAvailableBoardsByLocationAndCapacityAndOccupation_whenAllBoardsIsValid_shouldReturnBoardsPage() {
-        Pageable pageable = Pageable.unpaged();
-        BoardRegisterDTO dto1 = new BoardRegisterDTO(1, 4, VARANDA);
-        BoardRegisterDTO dto3 = new BoardRegisterDTO(2, 4, VARANDA);
-        Board board1 = new Board(dto1);
-        Board board3 = new Board(dto3);
-
-        List<Board> boarsList = Arrays.asList(board1, board3);
-        Page<Board> boardPage = new PageImpl<>(boarsList);
-        when(boardRepository.findByLocationAndCapacityAndActiveTrue(VARANDA, 4, pageable)).thenReturn(boardPage);
-
-        Page<Board> result = boardService.listAvailableBoardsByLocationAndCapacityAndOccupation(VARANDA, 4, pageable);
-
-        assertEquals(2, result.getTotalElements());
-
-        verify(boardRepository, times(1)).findByLocationAndCapacityAndActiveTrue(VARANDA, 4, pageable);
-        verify(occupationRepository, times(2)).findFirstByBoardIdOrderByBeginOccupationDesc(any());
-    }
-
 }
