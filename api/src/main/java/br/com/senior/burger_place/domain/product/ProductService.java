@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ProductService {
@@ -26,7 +27,7 @@ public class ProductService {
         return this.productRepository.findAll(specification, pageable).map(ProductDTO::new);
     }
 
-    public Optional<ProductDTO> showProduct(Long id) {
+    public Optional<ProductDTO> showProduct(UUID id) {
         InvalidIdValidation.validate(id);
 
         Product product = this.productRepository.getReferenceByIdAndActiveTrue(id);
@@ -58,7 +59,7 @@ public class ProductService {
         return new ProductDTO(this.productRepository.save(product));
     }
 
-    public ProductDTO updateProduct(Long id, UpdateProductDTO productData) {
+    public ProductDTO updateProduct(UUID id, UpdateProductDTO productData) {
         InvalidIdValidation.validate(id);
         InvalidDTOValidation.validate(productData);
 
@@ -74,7 +75,7 @@ public class ProductService {
         return new ProductDTO(product);
     }
 
-    public void deleteProduct(Long id) {
+    public void deleteProduct(UUID id) {
         InvalidIdValidation.validate(id);
 
         Product product = this.productRepository.getReferenceByIdAndActiveTrue(id);

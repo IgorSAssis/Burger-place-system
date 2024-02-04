@@ -1,5 +1,5 @@
 CREATE TABLE products (
-    id          SERIAL              PRIMARY KEY,
+    id          UUID                PRIMARY KEY,
     name        VARCHAR(255)        NOT NULL,
     ingredients VARCHAR(255)        NOT NULL,
     price       DOUBLE PRECISION    NOT NULL,

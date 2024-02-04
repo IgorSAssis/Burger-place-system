@@ -11,6 +11,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +23,8 @@ import java.util.Set;
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Occupation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private LocalDateTime beginOccupation;
     private LocalDateTime endOccupation;
     private Integer peopleCount;
@@ -49,7 +50,7 @@ public class Occupation {
         this.active = true;
     }
 
-    public Occupation(Long occupationId) {
+    public Occupation(UUID occupationId) {
         this.id = occupationId;
     }
 

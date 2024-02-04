@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("reviews/topics")
 public class TopicReviewsController {
@@ -53,7 +55,7 @@ public class TopicReviewsController {
     @Transactional
     public ResponseEntity<Object> update(
             @PathVariable
-            Long id,
+            UUID id,
             @RequestBody
             TopicReviewUpdateDTO dto
     ) {
@@ -63,7 +65,7 @@ public class TopicReviewsController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable Long id) {
+    public ResponseEntity<Object> delete(@PathVariable UUID id) {
         service.deleteTopicReview(id);
         return ResponseEntity.noContent().build();
     }

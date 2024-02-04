@@ -3,15 +3,17 @@ package br.com.senior.burger_place.domain.orderItem.dto;
 import br.com.senior.burger_place.domain.orderItem.OrderItem;
 import br.com.senior.burger_place.domain.orderItem.OrderItemStatus;
 
+import java.util.UUID;
+
 public record ListOrderItemsDTO(
-        Long id,
+        UUID id,
         String productName,
         String ingredients,
         Integer amount,
         String observation,
         Integer boardNumber,
         OrderItemStatus status,
-        Long occupationId
+        UUID occupationId
 ) {
     public ListOrderItemsDTO(OrderItem orderItem) {
         this(

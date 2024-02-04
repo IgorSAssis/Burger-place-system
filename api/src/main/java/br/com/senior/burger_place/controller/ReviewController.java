@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("reviews")
 public class ReviewController {
@@ -45,7 +47,7 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity listReviewById(@PathVariable Long id) {
+    public ResponseEntity listReviewById(@PathVariable UUID id) {
         ListingReviewDTO review = service.listReviewById(id);
         return ResponseEntity.status(HttpStatus.OK).body(review);
     }
@@ -54,7 +56,7 @@ public class ReviewController {
     @Transactional
     public ResponseEntity updateReview(
             @PathVariable
-            Long id,
+            UUID id,
             @RequestBody
             @Valid
             ReviewUpdateDTO dto
@@ -65,7 +67,7 @@ public class ReviewController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<Object> deleteReview(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteReview(@PathVariable UUID id) {
         service.deleteReview(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

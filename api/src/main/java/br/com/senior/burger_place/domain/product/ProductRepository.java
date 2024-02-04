@@ -7,14 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findAll(Specification<Product> specification, Pageable pageable);
 
     Page<Product> findAllByActiveTrue(Pageable pageable);
 
-    Product getReferenceByIdAndActiveTrue(Long id);
+    Product getReferenceByIdAndActiveTrue(UUID id);
 
-    List<Product> getReferenceByActiveTrueAndIdIn(List<Long> ids);
+    List<Product> getReferenceByActiveTrueAndIdIn(List<UUID> ids);
 }

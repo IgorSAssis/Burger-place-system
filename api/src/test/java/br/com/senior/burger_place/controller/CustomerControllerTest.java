@@ -4,9 +4,9 @@ import br.com.senior.burger_place.domain.address.Address;
 import br.com.senior.burger_place.domain.address.AdressDto;
 import br.com.senior.burger_place.domain.customer.Customer;
 import br.com.senior.burger_place.domain.customer.CustomerService;
-import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
-import br.com.senior.burger_place.domain.customer.dto.CustomerUpdatedDTO;
-import br.com.senior.burger_place.domain.customer.dto.ListingCustomersDTO;
+import br.com.senior.burger_place.domain.customer.dto.CreateCustomerDTO;
+import br.com.senior.burger_place.domain.customer.dto.UpdateCustomerDTO;
+import br.com.senior.burger_place.domain.customer.dto.CustomerDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.CoreMatchers;
@@ -52,7 +52,7 @@ class CustomerControllerTest {
     public void register_whenRegistrationDataNotIsValid_shouldReturnHttpStatus400() throws Exception {
 
         AdressDto adressDto = new AdressDto(null, null, null, null, null, null, null);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO(null, null, null, adressDto);
+        CreateCustomerDTO dto = new CreateCustomerDTO(null, null, null, adressDto);
 
         ResultActions result = this.mockMvc
                 .perform(
@@ -134,7 +134,7 @@ class CustomerControllerTest {
     @Test
     public void register_whenCustomerRegistrationDTOIsValid_shouldReturnStatus201() throws Exception {
         AdressDto adressDto = new AdressDto("Rua", "Bairro", "Cidade", "Estado", "89111111", "123", "complemento");
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Nome", "Email", "12345678900", adressDto);
+        CreateCustomerDTO dto = new CreateCustomerDTO("Nome", "Email", "12345678900", adressDto);
         Customer customer = new Customer(dto);
         customer.setId(1l);
 
@@ -214,10 +214,10 @@ class CustomerControllerTest {
         Customer customer1 = new Customer(1l, "Nome1", "email1@email.com", "12345678900", true, address);
         Customer customer2 = new Customer(2l, "Nome2", "email2@email.com", "12345678911", true, address);
 
-        PageImpl<ListingCustomersDTO> somePage = new PageImpl<>(
+        PageImpl<CustomerDTO> somePage = new PageImpl<>(
                 Arrays.asList(
-                        new ListingCustomersDTO(customer1),
-                        new ListingCustomersDTO(customer2)
+                        new CustomerDTO(customer1),
+                        new CustomerDTO(customer2)
                 ),
                 Pageable.ofSize(10), 10);
         when(this.customerService.listCustomer(any(Pageable.class))).thenReturn(somePage);
@@ -237,7 +237,7 @@ class CustomerControllerTest {
     @Test
     public void listAllCustomer_whenCustomersDoNotExist_shouldReturnStatus200WithOutAnyCustomers() throws Exception {
 
-        PageImpl<ListingCustomersDTO> somePage = new PageImpl<>(
+        PageImpl<CustomerDTO> somePage = new PageImpl<>(
                 List.of(),
                 Pageable.ofSize(5), 10);
 
@@ -312,7 +312,7 @@ class CustomerControllerTest {
         AdressDto adressDto = new AdressDto("Rua", "Bairro", "Cidade", "Estado", "12345678", "12", "complemento");
         Customer customer = new Customer(1l, "nome", "Email", "12344456777", true, new Address(adressDto));
 
-        CustomerUpdatedDTO updatedDto = new CustomerUpdatedDTO("novoNome", "novoEmail", null);
+        UpdateCustomerDTO updatedDto = new UpdateCustomerDTO("novoNome", "novoEmail", null);
         when(customerService.listCustomerById(1l)).thenReturn(customer);
 
         ResultActions response = this.mockMvc

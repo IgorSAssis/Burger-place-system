@@ -18,7 +18,7 @@ public record CreateOccupationDTO(
         @NotNull
         @Positive
         UUID boardId,
-        Set<Long> customerIds
+        Set<UUID> customerIds
 
 ) {
 }

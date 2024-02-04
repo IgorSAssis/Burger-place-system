@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("products")
@@ -36,7 +37,7 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> showProduct(
             @PathVariable
-            Long id
+            UUID id
     ) {
         Optional<ProductDTO> productOptional = this.productService.showProduct(id);
 
@@ -66,7 +67,7 @@ public class ProductController {
     @Transactional
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable
-            Long id,
+            UUID id,
             @RequestBody
             @Valid
             UpdateProductDTO productData
@@ -80,7 +81,7 @@ public class ProductController {
     @Transactional
     public ResponseEntity<Void> inactivateProduct(
             @PathVariable
-            Long id
+            UUID id
     ) {
         this.productService.deleteProduct(id);
 

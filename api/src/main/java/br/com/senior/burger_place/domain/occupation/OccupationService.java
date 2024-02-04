@@ -19,10 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class OccupationService {
@@ -41,7 +38,7 @@ public class OccupationService {
         return this.occupationRepository.findAllByActiveTrue(pageable).map(ListOccupationDTO::new);
     }
 
-    public Optional<OccupationDTO> showOccupation(Long id) {
+    public Optional<OccupationDTO> showOccupation(UUID id) {
         InvalidIdValidation.validate(id);
 
         Occupation occupation = this.occupationRepository.getReferenceByIdAndActiveTrue(id);
@@ -113,7 +110,7 @@ public class OccupationService {
         return new OccupationDTO(savedOccupation);
     }
 
-    public void addOrderItems(Long occupationId, AddOrderItemsDTO itemsDTO) {
+    public void addOrderItems(UUID occupationId, AddOrderItemsDTO itemsDTO) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidDTOValidation.validate(itemsDTO);
 
@@ -168,7 +165,7 @@ public class OccupationService {
         this.orderItemRepository.saveAll(orderItems);
     }
 
-    public void removeOrderItems(Long occupationId, RemoveOrderItemsDTO itemsDTO) {
+    public void removeOrderItems(UUID occupationId, RemoveOrderItemsDTO itemsDTO) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidDTOValidation.validate(itemsDTO);
 
@@ -201,7 +198,7 @@ public class OccupationService {
                 });
     }
 
-    public void updateOrderItem(Long occupationId, Long itemId, UpdateOrderItemDTO itemDTO) {
+    public void updateOrderItem(UUID occupationId, UUID itemId, UpdateOrderItemDTO itemDTO) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidIdValidation.validate(itemId, "ID do item inválido");
         InvalidDTOValidation.validate(itemDTO);
@@ -227,7 +224,7 @@ public class OccupationService {
         item.update(itemDTO);
     }
 
-    public void inactivateOccupation(Long occupationId) {
+    public void inactivateOccupation(UUID occupationId) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
 
         Occupation occupation = this.occupationRepository.getReferenceByIdAndActiveTrue(occupationId);
@@ -244,7 +241,7 @@ public class OccupationService {
         }
     }
 
-    public void startOrderItemPreparation(Long occupationId, Long itemId) {
+    public void startOrderItemPreparation(UUID occupationId, UUID itemId) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidIdValidation.validate(itemId, "ID do item inválido");
 
@@ -269,7 +266,7 @@ public class OccupationService {
         item.startPreparation();
     }
 
-    public void finishOrderItemPreparation(Long occupationId, Long itemId) {
+    public void finishOrderItemPreparation(UUID occupationId, UUID itemId) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidIdValidation.validate(itemId, "ID do item inválido");
 
@@ -294,7 +291,7 @@ public class OccupationService {
         item.finishPreparation();
     }
 
-    public void deliverOrderItem(Long occupationId, Long itemId) {
+    public void deliverOrderItem(UUID occupationId, UUID itemId) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidIdValidation.validate(itemId, "ID do item inválido");
 
@@ -319,7 +316,7 @@ public class OccupationService {
         item.deliver();
     }
 
-    public void cancelOrderItem(Long occupationId, Long itemId) {
+    public void cancelOrderItem(UUID occupationId, UUID itemId) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidIdValidation.validate(itemId, "ID do item inválido");
 
@@ -340,7 +337,7 @@ public class OccupationService {
         item.cancel();
     }
 
-    public void finishOccupation(Long occupationId, FinishOccupationDTO occupationDTO) {
+    public void finishOccupation(UUID occupationId, FinishOccupationDTO occupationDTO) {
         InvalidIdValidation.validate(occupationId, "ID da ocupação inválida");
         InvalidDTOValidation.validate(occupationDTO);
 

@@ -1,5 +1,5 @@
 CREATE TABLE occupations (
-    id                SERIAL          PRIMARY KEY,
+    id                UUID           PRIMARY KEY,
     begin_occupation  TIMESTAMP,
     end_occupation    TIMESTAMP,
     payment_form      VARCHAR(255),

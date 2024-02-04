@@ -10,12 +10,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface OccupationRepository extends JpaRepository<Occupation, Long> {
+public interface OccupationRepository extends JpaRepository<Occupation, UUID> {
     Page<Occupation> findAllByActiveTrue(Pageable pageable);
 
-    Occupation getReferenceByIdAndActiveTrue(Long id);
+    Occupation getReferenceByIdAndActiveTrue(UUID id);
 
-    boolean existsByIdAndActiveTrue(Long id);
+    boolean existsByIdAndActiveTrue(UUID id);
 
     Occupation findFirstByBoardIdOrderByBeginOccupationDesc(UUID boardId);
 }

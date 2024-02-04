@@ -19,7 +19,7 @@ import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/boards")
+@RequestMapping("boards")
 public class BoardController {
     @Autowired
     private BoardService boardService;

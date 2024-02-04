@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -19,8 +21,8 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("active = TRUE")
 public class OrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private int amount;
     private double itemValue;
     @Enumerated(EnumType.STRING)
@@ -73,12 +75,15 @@ public class OrderItem {
     public void startPreparation() {
         this.status = OrderItemStatus.EM_ANDAMENTO;
     }
+
     public void finishPreparation() {
         this.status = OrderItemStatus.PRONTO;
     }
+
     public void cancel() {
         this.status = OrderItemStatus.CANCELADO;
     }
+
     public void deliver() {
         this.status = OrderItemStatus.ENTREGUE;
     }

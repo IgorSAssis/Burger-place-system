@@ -3,9 +3,11 @@ package br.com.senior.burger_place.domain.occupation.dto;
 import br.com.senior.burger_place.domain.orderItem.OrderItem;
 import br.com.senior.burger_place.domain.orderItem.OrderItemStatus;
 
+import java.util.UUID;
+
 public record OrderItemDTO(
-        Long id,
-        Long productId,
+        UUID id,
+        UUID productId,
         String productName,
         String ingredients,
         Double itemValue,

@@ -3,8 +3,10 @@ package br.com.senior.burger_place.domain.product.dto;
 import br.com.senior.burger_place.domain.product.Product;
 import br.com.senior.burger_place.domain.product.ProductCategory;
 
+import java.util.UUID;
+
 public record ProductDTO(
-        Long id,
+        UUID id,
         String name,
         Double price,
         String ingredients,

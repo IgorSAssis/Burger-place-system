@@ -5,10 +5,11 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public record ReviewRegisterDTO(
         @NotNull
-        Long occupationId,
+        UUID occupationId,
         String comment,
         @NotEmpty
         List<TopicReviewRegisterDTO> items

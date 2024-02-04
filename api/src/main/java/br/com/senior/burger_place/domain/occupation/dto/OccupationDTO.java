@@ -6,12 +6,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public record OccupationDTO(
-        Long id,
-        @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+        UUID id,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime beginOccupation,
-        @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime endOccupation,
         PaymentForm paymentForm,
         Integer peopleCount,

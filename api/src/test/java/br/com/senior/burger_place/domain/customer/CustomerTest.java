@@ -2,8 +2,8 @@ package br.com.senior.burger_place.domain.customer;
 
 import br.com.senior.burger_place.domain.address.Address;
 import br.com.senior.burger_place.domain.address.AdressDto;
-import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
-import br.com.senior.burger_place.domain.customer.dto.CustomerUpdatedDTO;
+import br.com.senior.burger_place.domain.customer.dto.CreateCustomerDTO;
+import br.com.senior.burger_place.domain.customer.dto.UpdateCustomerDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,11 +25,11 @@ class CustomerTest {
     @Test
     public void updateInformation_whenNoNullValues_shouldUpdateData() {
         AdressDto oldAddress = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Nome Antigo", "emailAntigo@email.com", "99999999999", oldAddress);
+        CreateCustomerDTO dto = new CreateCustomerDTO("Nome Antigo", "emailAntigo@email.com", "99999999999", oldAddress);
         Customer oldCustomer = new Customer(dto);
 
         AdressDto adressDto = new AdressDto("Rua B", "Bairro B", "Cidade B", "Estado B", "999999999", null, null);
-        CustomerUpdatedDTO customerUploadDTO = new CustomerUpdatedDTO("Novo nome", "novoEmail@email.com", adressDto);
+        UpdateCustomerDTO customerUploadDTO = new UpdateCustomerDTO("Novo nome", "novoEmail@email.com", adressDto);
 
         oldCustomer.updateInformation(customerUploadDTO);
 
@@ -41,10 +41,10 @@ class CustomerTest {
     @Test
     public void updateInformation_whenNullValues_shouldNotUpdateData() {
         AdressDto adressDto = mock(AdressDto.class);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Nome Antigo", "emailAntigo@email.com", "99999999999", adressDto);
+        CreateCustomerDTO dto = new CreateCustomerDTO("Nome Antigo", "emailAntigo@email.com", "99999999999", adressDto);
         Customer oldCustomer = new Customer(dto);
 
-        CustomerUpdatedDTO customerUploadDTO = new CustomerUpdatedDTO(null, null, null);
+        UpdateCustomerDTO customerUploadDTO = new UpdateCustomerDTO(null, null, null);
 
         assertThrows(IllegalArgumentException.class, () -> customer.updateInformation(customerUploadDTO));
 
@@ -54,7 +54,7 @@ class CustomerTest {
     @Test
     public void updateInformation_whenAddressIsNotNull_shouldCallUpdateInformationAdressMethod() {
         AdressDto adressDto = new AdressDto("Rua B", "Bairro B", "Cidade B", "Estado B", "999999999", null, null);
-        CustomerUpdatedDTO customerUploadDTO = new CustomerUpdatedDTO("Novo nome", "novoEmail@email.com", adressDto);
+        UpdateCustomerDTO customerUploadDTO = new UpdateCustomerDTO("Novo nome", "novoEmail@email.com", adressDto);
 
         customer.updateInformation(customerUploadDTO);
 
@@ -64,7 +64,7 @@ class CustomerTest {
     @Test
     public void inactivate_whenInactivateIsCalled_activeAttributeShouldBeFalse() {
 
-        Customer customer = new Customer(new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", mock(AdressDto.class)));
+        Customer customer = new Customer(new CreateCustomerDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", mock(AdressDto.class)));
 
         assertTrue(customer.isActive());
         customer.inactivate();
