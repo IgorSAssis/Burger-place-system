@@ -6,9 +6,11 @@ import br.com.senior.burger_place.domain.product.dto.CreateProductDTO;
 import br.com.senior.burger_place.domain.product.dto.ProductDTO;
 import br.com.senior.burger_place.domain.product.dto.UpdateProductDTO;
 
+import java.util.UUID;
+
 public class ProductTestFactory {
 
-    public static Product productFactory(Long id) {
+    public static Product productFactory(UUID id) {
         return new Product(
                 id,
                 "Hamburguer clássico",
@@ -69,7 +71,7 @@ public class ProductTestFactory {
         );
     }
 
-    public static ProductDTO productDTOFactory(Long id) {
+    public static ProductDTO productDTOFactory(UUID id) {
         return ProductTestFactory.productDTOFactory(
                 id,
                 "Hamburguer tradicional",
@@ -80,7 +82,7 @@ public class ProductTestFactory {
     }
 
     public static ProductDTO productDTOFactory(
-            Long id,
+            UUID id,
             String name,
             Double price,
             String ingredients,

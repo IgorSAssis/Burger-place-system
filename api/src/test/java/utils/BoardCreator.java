@@ -15,7 +15,6 @@ public class BoardCreator {
                 .number(1)
                 .capacity(2)
                 .location(BoardLocation.AREA_INTERNA)
-                .occupied(false)
                 .build();
     }
 

@@ -97,8 +97,8 @@ public class BoardService {
             @NonNull
             UUID boardId
     ) {
-        this.checkIfActiveBoardExists(boardId);
-        this.boardRepository.inactivateBoardById(boardId);
+        Board board = this.findActiveBoardById(boardId);
+        board.inactivate();
     }
 
     @Transactional
@@ -106,8 +106,8 @@ public class BoardService {
             @NonNull
             UUID boardId
     ) {
-        this.checkIfActiveBoardExists(boardId);
-        this.boardRepository.updateBoardOccupied(boardId, true);
+        Board board = this.findActiveBoardById(boardId);
+        board.occupy();
     }
 
     @Transactional
@@ -115,13 +115,12 @@ public class BoardService {
             @NonNull
             UUID boardId
     ) {
-        this.checkIfActiveBoardExists(boardId);
-        this.boardRepository.updateBoardOccupied(boardId, false);
+        Board board = this.findActiveBoardById(boardId);
+        board.vacate();
     }
 
-    private void checkIfActiveBoardExists(UUID boardId) {
-        if (!this.boardRepository.existsByIdAndActiveTrue(boardId)) {
-            throw new IllegalArgumentException("Board does not exist or is already inactive");
-        }
+    private Board findActiveBoardById(UUID boardId) {
+        return this.boardRepository.findByIdAndActiveTrue(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("Board does not exists or is inactive"));
     }
 }

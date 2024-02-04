@@ -212,7 +212,7 @@ class BoardServiceTest {
         void updateBoard_whenBoardIsOccupied_shouldThrowIllegalStateException() {
             String expectedErrorMessage = "Cannot update occupied board";
             Board board = createBoard();
-            board.setOccupied(true);
+            board.occupy();
 
             mockFindByIdAndActiveTrue(board);
 
@@ -263,10 +263,6 @@ class BoardServiceTest {
             );
         }
 
-        private void mockFindByIdAndActiveTrue(Board expectedReturn) {
-            when(boardRepositoryMocked.findByIdAndActiveTrue(any(UUID.class))).thenReturn(Optional.ofNullable(expectedReturn));
-        }
-
         private void mockExistsByNumberAndActiveTrueAndIdNot(Boolean expectedReturn) {
             when(boardRepositoryMocked.existsByNumberAndActiveTrueAndIdNot(anyInt(), any(UUID.class)))
                     .thenReturn(expectedReturn);
@@ -287,12 +283,12 @@ class BoardServiceTest {
 
         @Test
         void inactivateBoard_whenBoardDoesNotExist_shouldThrowIllegalArgumentException() {
-            String expectedErrorMessage = "Board does not exist or is already inactive";
+            String expectedErrorMessage = "Board does not exists or is inactive";
 
-            mockExistsByIdAndActiveTrue(false);
+            mockFindByIdAndActiveTrue(null);
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
                     () -> boardService.inactivateBoard(UUID.randomUUID())
             );
 
@@ -301,11 +297,14 @@ class BoardServiceTest {
 
         @Test
         void inactivateBoard_whenBoardExists_shouldInactivateBoard() {
-            mockExistsByIdAndActiveTrue(true);
+            Board boardSpy = spy(createBoard());
+
+            mockFindByIdAndActiveTrue(boardSpy);
 
             boardService.inactivateBoard(UUID.randomUUID());
 
-            verify(boardRepositoryMocked, times(1)).inactivateBoardById(any(UUID.class));
+            verify(boardSpy, times(1)).inactivate();
+            assertFalse(boardSpy.getActive());
         }
     }
 
@@ -322,12 +321,12 @@ class BoardServiceTest {
 
         @Test
         void occupyBoard_whenBoardDoesNotExist_shouldThrowIllegalArgumentException() {
-            String expectedErrorMessage = "Board does not exist or is already inactive";
+            String expectedErrorMessage = "Board does not exists or is inactive";
 
-            mockExistsByIdAndActiveTrue(false);
+            mockFindByIdAndActiveTrue(null);
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
                     () -> boardService.occupyBoard(UUID.randomUUID())
             );
 
@@ -336,11 +335,14 @@ class BoardServiceTest {
 
         @Test
         void occupyBoard_whenBoardExists_shouldOccupyBoard() {
-            mockExistsByIdAndActiveTrue(true);
+            Board boardSpy = spy(createBoard());
+
+            mockFindByIdAndActiveTrue(boardSpy);
 
             boardService.occupyBoard(UUID.randomUUID());
 
-            verify(boardRepositoryMocked, times(1)).updateBoardOccupied(any(UUID.class), eq(true));
+            verify(boardSpy, times(1)).occupy();
+            assertTrue(boardSpy.getOccupied());
         }
     }
 
@@ -357,12 +359,12 @@ class BoardServiceTest {
 
         @Test
         void vacateBoard_whenBoardDoesNotExist_shouldThrowIllegalArgumentException() {
-            String expectedErrorMessage = "Board does not exist or is already inactive";
+            String expectedErrorMessage = "Board does not exists or is inactive";
 
-            mockExistsByIdAndActiveTrue(false);
+            mockFindByIdAndActiveTrue(null);
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
                     () -> boardService.vacateBoard(UUID.randomUUID())
             );
 
@@ -371,15 +373,20 @@ class BoardServiceTest {
 
         @Test
         void vacateBoard_whenBoardExists_shouldOccupyBoard() {
-            mockExistsByIdAndActiveTrue(true);
+            Board board = createBoard();
+            board.occupy();
+            Board boardSpy = spy(board);
+
+            mockFindByIdAndActiveTrue(boardSpy);
 
             boardService.vacateBoard(UUID.randomUUID());
 
-            verify(boardRepositoryMocked, times(1)).updateBoardOccupied(any(UUID.class), eq(false));
+            verify(boardSpy, times(1)).vacate();
+            assertFalse(boardSpy.getOccupied());
         }
     }
 
-    private void mockExistsByIdAndActiveTrue(Boolean expectedReturn) {
-        when(boardRepositoryMocked.existsByIdAndActiveTrue(any(UUID.class))).thenReturn(expectedReturn);
+    private void mockFindByIdAndActiveTrue(Board expectedReturn) {
+        when(boardRepositoryMocked.findByIdAndActiveTrue(any(UUID.class))).thenReturn(Optional.ofNullable(expectedReturn));
     }
 }

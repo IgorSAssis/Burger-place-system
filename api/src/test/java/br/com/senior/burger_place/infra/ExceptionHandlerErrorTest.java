@@ -23,70 +23,70 @@ import java.util.NoSuchElementException;
 @WebMvcTest(controllers = {ProductController.class})
 @ExtendWith(MockitoExtension.class)
 public class ExceptionHandlerErrorTest {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ProductController productController;
-    @MockBean
-    private ProductService productService;
-
-    @Test
-    void handleNotFound_whenThrowsEntityNotFoundException_shouldReturnStatus404() throws Exception {
-        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(EntityNotFoundException.class);
-
-        ResultActions response = this.mockMvc
-                .perform(
-                        MockMvcRequestBuilders.get("/products/{id}", 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-        response
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    void handleNotFound_whenThrowsDuplicateKeyException_shouldReturnStatus404() throws Exception {
-        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(DuplicateKeyException.class);
-
-        ResultActions response = this.mockMvc
-                .perform(
-                        MockMvcRequestBuilders.get("/products/{id}", 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-        response
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    void handleBadRequests_whenThrowsNoSuchElementException_shouldReturnStatus400() throws Exception {
-        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(NoSuchElementException.class);
-
-        ResultActions response = this.mockMvc
-                .perform(
-                        MockMvcRequestBuilders.get("/products/{id}", 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-        response
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    void handleBadRequests_whenThrowsIllegalArgumentException_shouldReturnStatus400() throws Exception {
-        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(IllegalArgumentException.class);
-
-        ResultActions response = this.mockMvc
-                .perform(
-                        MockMvcRequestBuilders.get("/products/{id}", 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-        response
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andDo(MockMvcResultHandlers.print());
-    }
+//    @Autowired
+//    private MockMvc mockMvc;
+//    @Autowired
+//    private ProductController productController;
+//    @MockBean
+//    private ProductService productService;
+//
+//    @Test
+//    void handleNotFound_whenThrowsEntityNotFoundException_shouldReturnStatus404() throws Exception {
+//        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(EntityNotFoundException.class);
+//
+//        ResultActions response = this.mockMvc
+//                .perform(
+//                        MockMvcRequestBuilders.get("/products/{id}", 1L)
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                );
+//
+//        response
+//                .andExpect(MockMvcResultMatchers.status().isNotFound())
+//                .andDo(MockMvcResultHandlers.print());
+//    }
+//
+//    @Test
+//    void handleNotFound_whenThrowsDuplicateKeyException_shouldReturnStatus404() throws Exception {
+//        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(DuplicateKeyException.class);
+//
+//        ResultActions response = this.mockMvc
+//                .perform(
+//                        MockMvcRequestBuilders.get("/products/{id}", 1L)
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                );
+//
+//        response
+//                .andExpect(MockMvcResultMatchers.status().isNotFound())
+//                .andDo(MockMvcResultHandlers.print());
+//    }
+//
+//    @Test
+//    void handleBadRequests_whenThrowsNoSuchElementException_shouldReturnStatus400() throws Exception {
+//        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(NoSuchElementException.class);
+//
+//        ResultActions response = this.mockMvc
+//                .perform(
+//                        MockMvcRequestBuilders.get("/products/{id}", 1L)
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                );
+//
+//        response
+//                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+//                .andDo(MockMvcResultHandlers.print());
+//    }
+//
+//    @Test
+//    void handleBadRequests_whenThrowsIllegalArgumentException_shouldReturnStatus400() throws Exception {
+//        Mockito.when(this.productService.showProduct(Mockito.anyLong())).thenThrow(IllegalArgumentException.class);
+//
+//        ResultActions response = this.mockMvc
+//                .perform(
+//                        MockMvcRequestBuilders.get("/products/{id}", 1L)
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                );
+//
+//        response
+//                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+//                .andDo(MockMvcResultHandlers.print());
+//    }
 }

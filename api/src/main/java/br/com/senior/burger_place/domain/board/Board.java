@@ -40,4 +40,32 @@ public class Board {
             this.number = newBoardNumber;
         }
     }
+
+    public void inactivate() {
+        if (!this.active) {
+            throw new IllegalStateException("Board already inactive");
+        }
+
+        if (this.occupied) {
+            throw new IllegalStateException("Cannot inactivate a occupied board");
+        }
+
+        this.active = false;
+    }
+
+    public void occupy() {
+        if (this.occupied) {
+            throw new IllegalStateException("Board already occupied");
+        }
+
+        this.occupied = true;
+    }
+
+    public void vacate() {
+        if (!this.occupied) {
+            throw new IllegalStateException("Board is not occupied");
+        }
+
+        this.occupied = false;
+    }
 }

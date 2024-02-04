@@ -41,15 +41,5 @@ public interface BoardRepository extends JpaRepository<Board, UUID> {
                             );
                             """)
     boolean isBoardOccupied(UUID id);
-
-    boolean existsByIdAndActiveTrue(UUID id);
-
-    @Query("UPDATE Board SET active = false WHERE id = :id")
-    @Modifying(clearAutomatically = true)
-    void inactivateBoardById(UUID id);
-
-    @Query("UPDATE Board SET occupied = :occupied WHERE id = :id")
-    @Modifying
-    void updateBoardOccupied(UUID id, Boolean occupied);
 }
 
