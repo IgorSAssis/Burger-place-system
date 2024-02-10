@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -64,8 +63,8 @@ public class BoardController {
 
     @PostMapping
     public ResponseEntity<BoardDTO> create(
-            @RequestBody
             @Valid
+            @RequestBody
             CreateBoardDTO dto,
             UriComponentsBuilder uriBuilder
     ) {
@@ -83,13 +82,13 @@ public class BoardController {
     public ResponseEntity<BoardDTO> update(
             @PathVariable
             UUID id,
-            @RequestBody
             @Valid
+            @RequestBody
             UpdateBoardDTO dto
     ) {
-        BoardDTO updatedBoard = this.boardConverter.toBoardDTO(boardService.updateBoard(id, dto));
-
-        return ResponseEntity.status(HttpStatus.OK).body(updatedBoard);
+        return ResponseEntity.ok(
+                this.boardConverter.toBoardDTO(boardService.updateBoard(id, dto))
+        );
     }
 
 

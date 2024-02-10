@@ -42,7 +42,6 @@ import static utils.BoardCreator.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BoardController integration tests")
 class BoardControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired

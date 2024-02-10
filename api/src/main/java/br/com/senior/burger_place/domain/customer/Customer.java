@@ -19,5 +19,27 @@ public class Customer {
     private String name;
     private String email;
     private String cpf;
-    private Boolean active;
+    @Builder.Default
+    private Boolean active = true;
+
+    public void update(
+            String name,
+            String email
+    ) {
+        if (name != null) {
+            this.name = name;
+        }
+
+        if (email != null) {
+            this.email = email;
+        }
+    }
+
+    public void inactivate() {
+        if (!this.active) {
+            throw new IllegalStateException("Customer already inactive");
+        }
+
+        this.active = false;
+    }
 }

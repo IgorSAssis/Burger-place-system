@@ -1,14 +1,21 @@
 package br.com.senior.burger_place.domain.customer;
 
+import br.com.senior.burger_place.domain.customer.dto.CreateCustomerDTO;
+import br.com.senior.burger_place.domain.customer.dto.UpdateCustomerDTO;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 public class CustomerService {
-
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
@@ -27,40 +34,67 @@ public class CustomerService {
         return this.customerRepository.findAll(specification, pageable);
     }
 
-//    @Autowired
-//    CustomerRepository customerRepository;
-//
-//    public Customer addCustomer(CustomerRegistrationDTO data) {
-//        if (customerRepository.existsByCpf(data.cpf())) {
-//            throw new DuplicateKeyException("Já existe um cliente com o mesmo cpf.");
-//        }
-//        if (customerRepository.existsByEmail(data.email())) {
-//            throw new DuplicateKeyException("Já existe um cliente com o mesmo e-mail.");
-//        }
-//        if (data.cpf().length() > 11) {
-//            throw new IllegalArgumentException("O CPF deve ter 11 dígitos");
-//
-//        }
-//        return customerRepository.save(new Customer(data));
-//    }
-//
-//    public Page<ListingCustomersDTO> listCustomer(Pageable pageable) {
-//        return customerRepository.findAllByActiveTrue(pageable).map(ListingCustomersDTO::new);
-//    }
-//
-//    public Customer listCustomerById(Long id) {
-//        Customer customer = customerRepository.getReferenceByIdAndActiveTrue(id);
-//        if (customer == null) {
-//            throw new EntityNotFoundException("Cliente não existe ou está inativado");
-//        }
-//        return customer;
-//    }
-//
-//    public void updateCustomer(Long id, CustomerUpdatedDTO data) {
-//        Customer customer = customerRepository.getReferenceByIdAndActiveTrue(id);
-//        if (customer == null) {
-//            throw new EntityNotFoundException("Cliente não existe ou está inativado");
-//        }
-//        customer.updateInformation(data);
-//    }
+    public Customer showCustomer(
+            @NonNull
+            UUID customerId
+    ) {
+        return this.customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Customer does not exist"));
+    }
+
+    @Transactional
+    public Customer createCustomer(
+            @NonNull
+            @Valid
+            CreateCustomerDTO dto
+    ) {
+        if (customerRepository.existsByCpf(dto.getCpf())) {
+            throw new IllegalArgumentException("CPF already registered");
+        }
+        if (customerRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+
+        Customer customer = Customer.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .cpf(dto.getCpf())
+                .build();
+
+        return this.customerRepository.save(customer);
+    }
+
+    @Transactional
+    public Customer updateCustomer(
+            @NonNull
+            UUID customerId,
+            @NonNull
+            @Valid
+            UpdateCustomerDTO dto
+    ) {
+        Customer customer = this.findActiveCustomerById(customerId);
+
+        if (this.customerRepository.existsByActiveTrueAndEmailEqualsAndIdNot(dto.getEmail(), customerId)) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        customer.update(dto.getName(), dto.getEmail());
+
+        return customer;
+    }
+
+    @Transactional
+    public void inactivateCustomer(
+            @NonNull
+            UUID customerId
+    ) {
+        Customer customer = this.findActiveCustomerById(customerId);
+
+        customer.inactivate();
+    }
+
+    private Customer findActiveCustomerById(UUID customerId) {
+        return this.customerRepository.findByIdAndActiveTrue(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Customer does not exists or is inactive"));
+    }
 }

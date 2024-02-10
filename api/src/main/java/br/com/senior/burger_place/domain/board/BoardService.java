@@ -3,7 +3,6 @@ package br.com.senior.burger_place.domain.board;
 import br.com.senior.burger_place.domain.board.dto.CreateBoardDTO;
 import br.com.senior.burger_place.domain.board.dto.UpdateBoardDTO;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 

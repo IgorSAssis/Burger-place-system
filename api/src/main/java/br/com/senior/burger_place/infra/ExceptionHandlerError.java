@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -36,9 +37,9 @@ public class ExceptionHandlerError {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ResponseWithFieldErrors> handleBadRequestsWithFieldErrors(MethodArgumentNotValidException exception) {
         List<FieldError> errors = exception.getFieldErrors().stream()
-                .map(fieldError ->
-                        new FieldError(fieldError.getField(), fieldError.getDefaultMessage())
-                ).toList();
+                .map(fieldError -> new FieldError(fieldError.getField(), fieldError.getDefaultMessage()))
+                .sorted((Comparator.comparing(FieldError::getField)))
+                .toList();
         ResponseWithFieldErrors response = new ResponseWithFieldErrors(errors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
