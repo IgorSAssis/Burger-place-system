@@ -1,13 +1,13 @@
 package br.com.senior.burger_place.domain.review.dto;
 
 import br.com.senior.burger_place.domain.review.Review;
-import br.com.senior.burger_place.domain.review.topicReview.TopicReview;
 import br.com.senior.burger_place.domain.review.topicReview.dto.ListingTopicReviewDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 public record ListingReviewDTO(
-        Long id,
+        UUID id,
         String comment,
         List<ListingTopicReviewDTO> topicReviews
 

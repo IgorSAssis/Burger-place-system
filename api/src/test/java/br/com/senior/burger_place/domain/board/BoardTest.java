@@ -1,47 +1,103 @@
 package br.com.senior.burger_place.domain.board;
 
-import br.com.senior.burger_place.domain.board.dto.BoardRegisterDTO;
-import br.com.senior.burger_place.domain.board.dto.BoardUpdateDTO;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import static br.com.senior.burger_place.domain.board.BoardLocation.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static utils.BoardCreator.createBoard;
 
-@ExtendWith(MockitoExtension.class)
-class BoardTest {
+@DisplayName("Board unit tests")
+public class BoardTest {
 
-    @Test
-    public void updateInformation_whenNoNullValues_shouldUpdateData(){
-        Board board = new Board(new BoardRegisterDTO(1, 3, TERRACO));
-        BoardUpdateDTO newDto = new BoardUpdateDTO(2, 4, VARANDA);
+    private Board board;
 
-        board.updateInformation(newDto);
-
-        assertEquals(2, board.getNumber());
-        assertEquals(4, board.getCapacity());
-        assertEquals(VARANDA, board.getLocation());
+    @BeforeEach
+    void setUp() {
+        this.board = createBoard();
     }
 
-    @Test
-    public void updateInformation_whenNullValues_shoulNotdUpdateData(){
-        Board board = new Board(new BoardRegisterDTO(1, 3, TERRACO));
-        BoardUpdateDTO newDto = new BoardUpdateDTO(null, null, null);
+    @Nested
+    @DisplayName("inactivate tests")
+    class InactivateTest {
+        @Test
+        void inactivate_whenBoardIsInactive_shouldThrowIllegalStateException() {
+            String expectedErrorMessage = "Board already inactive";
 
-        board.updateInformation(newDto);
+            board.inactivate();
 
-        assertEquals(1, board.getNumber());
-        assertEquals(3, board.getCapacity());
-        assertEquals(TERRACO, board.getLocation());
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> board.inactivate()
+            );
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void inactivate_whenBoardIsOccupied_shouldThrowIllegalStateException() {
+            String expectedErrorMessage = "Cannot inactivate a occupied board";
+
+            board.occupy();
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> board.inactivate()
+            );
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void inactivate_whenHasValidState_shouldInactivate() {
+            board.inactivate();
+
+            assertFalse(board.getActive());
+        }
     }
 
-    @Test
-    public void inactivate_whenInactivateIsCalled_activeAttributeShouldBeFalse(){
-        Board board = new Board(new BoardRegisterDTO(2, 3, TERRACO));
+    @Nested
+    @DisplayName("occupyy tests")
+    class OccupyTest {
+        @Test
+        void occupy_whenBoardIsOccupied_shouldThrowIllegalStateException() {
+            String expectedErrorMessage = "Board already occupied";
 
-        assertTrue(board.isActive());
-        board.inactivate();
-        assertFalse(board.isActive());
+            board.occupy();
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> board.occupy()
+            );
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void occupy_whenBoardIsNotOccupied_shouldOccupyBoard() {
+            board.occupy();
+
+            assertTrue(board.getOccupied());
+        }
+    }
+
+    @Nested
+    @DisplayName("vacate tests")
+    class VacateTest {
+        @Test
+        void vacate_whenBoardIsNotOccupied_shouldThrowIllegalStateException() {
+            String expectedErrorMessage = "Board is not occupied";
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> board.vacate()
+            );
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void vacate_whenBoardIsOccupied_shouldVacateBoard() {
+            board.occupy();
+            board.vacate();
+            assertFalse(board.getOccupied());
+        }
     }
 }

@@ -1,12 +1,12 @@
-INSERT INTO customers (name, email, cpf, street_address, neighborhood, city, state, postal_code, residential_number, complement, active)
+INSERT INTO customers (id, name, email, cpf, active)
 VALUES
-    ('João Silva', 'joao@email.com', '12345678900', 'Rua Principal', 'Centro', 'Cidade A', 'Estado A', '12345678', '10', 'Apartamento 101', true),
-    ('Maria Souza', 'maria@email.com', '98765432100', 'Avenida Secundária', 'Bairro B', 'Cidade B', 'Estado B', '87654321', '20', 'Casa', true),
-    ('Pedro Oliveira', 'pedro@email.com', '45678912300', 'Rua Qualquer', 'Bairro C', 'Cidade C', 'Estado C', '13579246', '15', 'Bloco B, Sala 303', true),
-    ('Ana Santos', 'ana@email.com', '78912345600', 'Rua Desconhecida', 'Bairro D', 'Cidade D', 'Estado D', '24681357', '5', 'Casa Amarela', true),
-    ('Lucas Pereira', 'lucas@email.com', '32165498700', 'Rua Nova', 'Bairro E', 'Cidade E', 'Estado E', '98765432', '30', 'Casa 2', true),
-    ('Mariana Costa', 'mariana@email.com', '14725836900', 'Avenida Principal', 'Bairro F', 'Cidade F', 'Estado F', '55555555', '25', 'Bloco C, Apt 202', true),
-    ('Fernanda Oliveira', 'fernanda@email.com', '36925814700', 'Rua dos Fundos', 'Bairro G', 'Cidade G', 'Estado G', '11111111', '40', 'Casa 3', true),
-    ('Rafaela Martins', 'rafaela@email.com', '25814736900', 'Rua das Flores', 'Bairro H', 'Cidade H', 'Estado H', '22222222', '12', 'Apartamento 505', true),
-    ('Gustavo Pereira', 'gustavo@email.com', '85296374100', 'Rua Principal', 'Bairro I', 'Cidade I', 'Estado I', '33333333', '18', 'Casa 4', true),
-    ('Rodrigo Santos', 'rodrigo@email.com', '74185296300', 'Rua da Esquina', 'Bairro J', 'Cidade J', 'Estado J', '44444444', '22', 'Bloco A, Apt 101', true);
+    ('76ff3a2a-1def-42ae-ae5c-d1d8df8102e8', 'João Silva', 'joao@email.com', '12345678900', true),
+    ('4aadb8dc-97ec-48cd-95bf-f49bf0a72d81', 'Maria Souza', 'maria@email.com', '98765432100', true),
+    ('ae2beff0-16a5-4ae1-ab81-ecc311b2876f', 'Pedro Oliveira', 'pedro@email.com', '45678912300', true),
+    ('b475f4ca-7265-4bb1-8701-82acc4b9516d', 'Ana Santos', 'ana@email.com', '78912345600', true),
+    ('922228c2-933e-44c0-8805-1a774f7ea85f', 'Lucas Pereira', 'lucas@email.com', '32165498700', true),
+    ('2b6b9d30-02d6-415b-97eb-6063fd9ef203', 'Mariana Costa', 'mariana@email.com', '14725836900', true),
+    ('9aba094c-afad-4e11-86af-4a661b8d5720', 'Fernanda Oliveira', 'fernanda@email.com', '36925814700', true),
+    ('df2e51bc-1472-40b7-95a8-21eaec373acd', 'Rafaela Martins', 'rafaela@email.com', '25814736900', true),
+    ('da8f0bcf-7a9a-4ecc-9764-7b980981a1ee', 'Gustavo Pereira', 'gustavo@email.com', '85296374100', true),
+    ('7cb652b1-e36a-4032-8510-f135d2b8b01a', 'Rodrigo Santos', 'rodrigo@email.com', '74185296300', true);

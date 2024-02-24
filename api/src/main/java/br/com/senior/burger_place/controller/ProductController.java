@@ -1,11 +1,11 @@
 package br.com.senior.burger_place.controller;
 
 import br.com.senior.burger_place.domain.product.ProductCategory;
+import br.com.senior.burger_place.domain.product.ProductConverter;
 import br.com.senior.burger_place.domain.product.ProductService;
 import br.com.senior.burger_place.domain.product.dto.CreateProductDTO;
 import br.com.senior.burger_place.domain.product.dto.ProductDTO;
 import br.com.senior.burger_place.domain.product.dto.UpdateProductDTO;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,74 +15,83 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("products")
 public class ProductController {
-
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ProductConverter productConverter;
 
-    @GetMapping
-    public ResponseEntity<Page<ProductDTO>> listProducts(
-            Pageable pageable,
+    @GetMapping()
+    public ResponseEntity<Page<ProductDTO>> list(
+            @RequestParam(name = "name", required = false)
+            String name,
+            @RequestParam(name = "price", required = false)
+            Double price,
+            @RequestParam(name = "ingredients", required = false)
+            String ingredients,
             @RequestParam(name = "category", required = false)
-            ProductCategory category
+            ProductCategory category,
+            @RequestParam(name = "active", required = false)
+            Boolean active,
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(this.productService.listProducts(pageable, category));
+        Page<ProductDTO> productDTOS = this.productService
+                .listProducts(pageable, name, price, ingredients, category, active)
+                .map(this.productConverter::toProductDTO);
+
+        return ResponseEntity.ok(productDTOS);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> showProduct(
+    public ResponseEntity<ProductDTO> show(
             @PathVariable
-            Long id
+            UUID id
     ) {
-        Optional<ProductDTO> productOptional = this.productService.showProduct(id);
-
-        return productOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-
+        return ResponseEntity.ok(
+                this.productConverter.toProductDTO(this.productService.showProduct(id))
+        );
     }
 
     @PostMapping
-    @Transactional
-    public ResponseEntity<ProductDTO> createProduct(
+    public ResponseEntity<ProductDTO> create(
             @RequestBody
             @Valid
-            CreateProductDTO productData,
+            CreateProductDTO dto,
             UriComponentsBuilder uriComponentsBuilder
     ) {
-        ProductDTO product = this.productService.createProduct(productData);
+        ProductDTO productDTO = this.productConverter.toProductDTO(this.productService.createProduct(dto));
 
         URI uri = uriComponentsBuilder
                 .path("/products/{id}")
-                .buildAndExpand(product.id())
+                .buildAndExpand(productDTO.getId())
                 .toUri();
 
-        return ResponseEntity.created(uri).body(product);
+        return ResponseEntity.created(uri).body(productDTO);
     }
 
     @PutMapping("/{id}")
-    @Transactional
-    public ResponseEntity<ProductDTO> updateProduct(
+    public ResponseEntity<ProductDTO> update(
             @PathVariable
-            Long id,
+            UUID id,
             @RequestBody
             @Valid
             UpdateProductDTO productData
     ) {
         return ResponseEntity.ok(
-                this.productService.updateProduct(id, productData)
+                this.productConverter.toProductDTO(this.productService.updateProduct(id, productData))
         );
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<Void> inactivateProduct(
+    public ResponseEntity<Void> inactivate(
             @PathVariable
-            Long id
+            UUID id
     ) {
-        this.productService.deleteProduct(id);
+        this.productService.inactivateProduct(id);
 
         return ResponseEntity.noContent().build();
     }

@@ -5,13 +5,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
-    List<OrderItem> getReferenceByActiveTrueAndOccupationIdAndIdIn(Long occupationId, List<Long> orderItemIds);
+public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
+    List<OrderItem> getReferenceByActiveTrueAndOccupationIdAndIdIn(UUID occupationId, List<UUID> orderItemIds);
 
-    OrderItem getReferenceByIdAndOccupationIdAndActiveTrue(Long id, Long occupationId);
+    OrderItem getReferenceByIdAndOccupationIdAndActiveTrue(UUID id, UUID occupationId);
 
-    List<OrderItem> findByOccupationId(Long occupationId);
+    List<OrderItem> findByOccupationId(UUID occupationId);
 
     Page<OrderItem> findAllByActiveTrueAndStatusEquals(Pageable pageable, OrderItemStatus status);
 

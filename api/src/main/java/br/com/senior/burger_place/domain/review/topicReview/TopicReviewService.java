@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TopicReviewService {
@@ -31,14 +32,14 @@ public class TopicReviewService {
         return new ListingTopicReviewDTO(topicReview);
     }
 
-    public void deleteTopicReview(Long id) {
+    public void deleteTopicReview(UUID id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Avaliação não existe");
         }
         repository.deleteById(id);
     }
 
-    public TopicReviewRegisterDTO updateTopicReview(Long id, TopicReviewUpdateDTO dto) {
+    public TopicReviewRegisterDTO updateTopicReview(UUID id, TopicReviewUpdateDTO dto) {
         Optional<TopicReview> optionalTopicReview = repository.findById(id);
         if (optionalTopicReview.isEmpty()) {
             throw new EntityNotFoundException("Avaliação não existe");

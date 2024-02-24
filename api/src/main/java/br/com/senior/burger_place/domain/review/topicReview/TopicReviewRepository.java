@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface TopicReviewRepository extends JpaRepository<TopicReview, Long> {
+public interface TopicReviewRepository extends JpaRepository<TopicReview, UUID> {
 
     @Query(
             nativeQuery = true,
@@ -20,9 +21,9 @@ public interface TopicReviewRepository extends JpaRepository<TopicReview, Long> 
                             );
                             """
     )
-    boolean verifyOccupationExists(Long id);
+    boolean verifyOccupationExists(UUID id);
 
     Page<TopicReview> findByCategory(Category category, Pageable pageable);
 
-    List<TopicReview> findByReviewId(Long reviewId);
+    List<TopicReview> findByReviewId(UUID reviewId);
 }

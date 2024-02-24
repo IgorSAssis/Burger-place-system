@@ -1,167 +1,327 @@
 package br.com.senior.burger_place.domain.customer;
 
-import br.com.senior.burger_place.domain.address.AdressDto;
-import br.com.senior.burger_place.domain.customer.dto.CustomerRegistrationDTO;
-import br.com.senior.burger_place.domain.customer.dto.CustomerUpdatedDTO;
-import br.com.senior.burger_place.domain.customer.dto.ListingCustomersDTO;
+import br.com.senior.burger_place.domain.customer.dto.CreateCustomerDTO;
+import br.com.senior.burger_place.domain.customer.dto.UpdateCustomerDTO;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import utils.CustomerCreator;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static utils.CustomerCreator.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("CustomerService unit tests")
 class CustomerServiceTest {
-
     @InjectMocks
     private CustomerService customerService;
     @Mock
-    private CustomerRepository customerRepository;
-    @Captor
-    private ArgumentCaptor<Customer> customerCaptor;
+    private CustomerRepository customerRepositoryMocked;
+    @Mock
+    private CustomerSpecification customerSpecificationMocked;
 
-    @Test
-    public void addCustomer_whenNotExistsAclientWithSameEmail_shouldSaveCustomer() {
+    @Nested
+    @DisplayName("listCustomers tests")
+    class ListCustomersTest {
+        @Test
+        void listCustomers_whenExistCustomers_shouldReturnPageWithCustomers() {
+            List<Customer> customers = List.of(createCustomer());
+            Page<Customer> customerPage = new PageImpl<>(customers, Pageable.ofSize(10), 1);
 
-        AdressDto adressDto = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", adressDto);
+            mockApplyFilters(Specification.where(null));
+            mockFindAll(customerPage);
 
-        when(customerRepository.existsByCpf(dto.cpf())).thenReturn(false);
-        when(customerRepository.existsByEmail(dto.email())).thenReturn(false);
+            List<Customer> output = customerService.listCustomers(
+                    customerPage.getPageable(), null, null, null
+            ).toList();
 
-        customerService.addCustomer(dto);
-        verify(customerRepository, times(1)).save(customerCaptor.capture());
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(1, output.size()),
+                    () -> assertEquals(customers.get(0), output.get(0))
+            );
+        }
 
-        Customer customerCaptured = customerCaptor.getValue();
+        @Test
+        void listCustomers_whenDoNotExistCustomers_shouldReturnEmptyPage() {
+            Page<Customer> customerPage = new PageImpl<>(List.of(), Pageable.ofSize(10), 1);
 
-        assertEquals(dto.name(), customerCaptured.getName());
-        assertEquals(dto.cpf(), customerCaptured.getCpf());
-        assertEquals(dto.email(), customerCaptured.getEmail());
+            mockApplyFilters(Specification.where(null));
+            mockFindAll(customerPage);
 
-        assertEquals(dto.address().neighborhood(), customerCaptured.getAddress().getNeighborhood());
-        assertEquals(dto.address().city(), customerCaptured.getAddress().getCity());
-        assertEquals(dto.address().streetAddress(), customerCaptured.getAddress().getStreetAddress());
-        assertEquals(dto.address().state(), customerCaptured.getAddress().getState());
-        assertEquals(dto.address().complement(), customerCaptured.getAddress().getComplement());
-        assertEquals(dto.address().postalCode(), customerCaptured.getAddress().getPostalCode());
-        assertEquals(dto.address().residentialNumber(), customerCaptured.getAddress().getResidentialNumber());
+            List<Customer> output = customerService.listCustomers(
+                    customerPage.getPageable(), null, null, null
+            ).toList();
+
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertTrue(output.isEmpty())
+            );
+        }
+
+        private void mockApplyFilters(Specification<Customer> expectedReturn) {
+            when(customerSpecificationMocked.applyFilters(null, null, null))
+                    .thenReturn(expectedReturn);
+        }
+
+        private void mockFindAll(Page<Customer> expectedReturn) {
+            when(customerRepositoryMocked.findAll(eq(Specification.where(null)), any(Pageable.class)))
+                    .thenReturn(expectedReturn);
+        }
     }
 
+    @Nested
+    @DisplayName("showCustomer tests")
+    class ShowCustomerTest {
+        @Test
+        void showCustomer_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.showCustomer(null)
+            );
+        }
 
-    @Test
-    public void addCustomer_whenExistsAclientWithSameCpf_shouldThrowException() {
+        @Test
+        void showCustomer_whenCustomerDoesNotExist_shouldThrowEntityNotFoundException() {
+            String expectedErrorMessage = "Customer does not exist";
 
-        AdressDto adressDto = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", adressDto);
+            mockFindById(null);
 
-        when(customerRepository.existsByCpf(dto.cpf())).thenReturn(true);
-        DuplicateKeyException exception = assertThrows(DuplicateKeyException.class,
-                () -> customerService.addCustomer(dto));
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
+                    () -> customerService.showCustomer(UUID.randomUUID())
+            );
 
-        assertEquals("Já existe um cliente com o mesmo cpf.", exception.getMessage());
-        verify(customerRepository, never()).save(any(Customer.class));
-    }
-    @Test
-    public void addCustomer_whenTheCPFHasMoreThan11Digits_shouldThrowException() {
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
 
-        AdressDto adressDto = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "999999999001233", adressDto);
+        @Test
+        void showCustomer_whenCustomerExists_shouldReturnCustomer() {
+            Customer customer = createCustomer();
 
-        when(customerRepository.existsByCpf(dto.cpf())).thenReturn(false);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> customerService.addCustomer(dto));
+            mockFindById(customer);
 
-        assertEquals("O CPF deve ter 11 dígitos", exception.getMessage());
-        verify(customerRepository, never()).save(any(Customer.class));
-    }
+            Customer output = customerService.showCustomer(UUID.randomUUID());
 
-    @Test
-    public void addCustomer_whenExistsAclientWithSameEmail_shouldThrowException() {
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(customer, output)
+            );
+        }
 
-        AdressDto adressDto = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
-        CustomerRegistrationDTO dto = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", adressDto);
-
-        when(customerRepository.existsByCpf(dto.cpf())).thenReturn(false);
-        when(customerRepository.existsByEmail(dto.email())).thenReturn(true);
-        DuplicateKeyException exception = assertThrows(DuplicateKeyException.class,
-                () -> customerService.addCustomer(dto));
-
-        assertEquals("Já existe um cliente com o mesmo e-mail.", exception.getMessage());
-        verify(customerRepository, never()).save(any(Customer.class));
-    }
-
-    @Test
-    public void listCustomer_whenCustomerIsActive_shouldReturnInPagination() {
-        AdressDto adressDto = new AdressDto("Rua A", "Bairro A", "Cidade A", "Estado A", "88888888", null, null);
-        CustomerRegistrationDTO customer01 = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", adressDto);
-        CustomerRegistrationDTO customer02 = new CustomerRegistrationDTO("Rodrigo Alencar", "Rodrigo@email.com", "99999999911", adressDto);
-        List<Customer> customersActiveList = List.of(new Customer(customer01), new Customer(customer02));
-
-        when(customerRepository.findAllByActiveTrue(any(Pageable.class))).
-                thenReturn(new PageImpl<>(customersActiveList));
-
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<ListingCustomersDTO> result = customerService.listCustomer(pageable);
-
-        verify(customerRepository, times(1)).findAllByActiveTrue(any(Pageable.class));
-
-        assertEquals(2, result.getContent().size());
+        private void mockFindById(Customer customer) {
+            when(customerRepositoryMocked.findById(any(UUID.class)))
+                    .thenReturn(Optional.ofNullable(customer));
+        }
     }
 
-    @Test
-    public void listCustomerById_whenCustomerIsNotNull_shouldReturnCustomer(){
-        Long customerId = 1l;
-        CustomerRegistrationDTO customer01 = new CustomerRegistrationDTO("Ricardo Almeira", "Ricardo@email.com", "99999999900", mock(AdressDto.class));
-        Customer customer = new Customer(customer01);
+    @Nested
+    @DisplayName("createCustomer tests")
+    class CreateCustomerTest {
+        @Captor
+        private ArgumentCaptor<Customer> customerArgumentCaptor;
 
-        when(customerRepository.getReferenceByIdAndActiveTrue(customerId)).thenReturn(customer);
-        Customer result = customerService.listCustomerById(customerId);
+        @Test
+        void createCustomer_whenDTOIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.createCustomer(null)
+            );
+        }
 
-        assertEquals(customer, result);
-        verify(customerRepository, times(1)).getReferenceByIdAndActiveTrue(customerId);
+        @Test
+        void createCustomer_whenDTOCpfIsAlreadyRegistered_shouldThrowIllegalArgumentException() {
+            String expectedErrorMessage = "CPF already registered";
+            CreateCustomerDTO dto = createCreateCustomerDTO();
+
+            mockExistsByCpf(true);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.createCustomer(dto)
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void createCustomer_whenDTOEmailIsAlreadyRegistered_shouldThrowIllegalArgumentException() {
+            String expectedErrorMessage = "Email already registered";
+            CreateCustomerDTO dto = createCreateCustomerDTO();
+
+            mockExistsByCpf(false);
+            mockExistsByEmail(true);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.createCustomer(dto)
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void createCustomer_whenDTOisValid_shouldCreateCustomer() {
+            CreateCustomerDTO dto = createCreateCustomerDTO();
+
+            mockExistsByCpf(false);
+            mockExistsByEmail(false);
+
+            customerService.createCustomer(dto);
+            verify(customerRepositoryMocked, times(1)).save(customerArgumentCaptor.capture());
+
+            Customer output = customerArgumentCaptor.getValue();
+
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(dto.getName(), output.getName()),
+                    () -> assertEquals(dto.getEmail(), output.getEmail()),
+                    () -> assertEquals(dto.getCpf(), output.getCpf()),
+                    () -> assertTrue(output.getActive())
+            );
+        }
+
+        private void mockExistsByCpf(Boolean expectedReturn) {
+            when(customerRepositoryMocked.existsByCpf(anyString())).thenReturn(expectedReturn);
+        }
+
+        private void mockExistsByEmail(Boolean expectedReturn) {
+            when(customerRepositoryMocked.existsByEmail(anyString())).thenReturn(expectedReturn);
+        }
     }
-    @Test
-    public void listCustomerById_whenCustomerIsNull_shouldThrowException(){
-        Long customerId = 1l;
 
-        when(customerRepository.getReferenceByIdAndActiveTrue(customerId)).thenReturn(null);
+    @Nested
+    @DisplayName("updateCustomer tests")
+    class UpdateCustomerTest {
+        @Test
+        void updateCustomer_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.updateCustomer(null, null)
+            );
+        }
 
-        assertThrows(EntityNotFoundException.class, () -> customerService.listCustomerById(customerId));
-        verify(customerRepository, times(1)).getReferenceByIdAndActiveTrue(customerId);
+        @Test
+        void updateCustomer_whenDTOIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), null)
+            );
+        }
+
+        @Test
+        void updateCustomer_whenCustomerDoesNotExist_shouldThrowEntityNotFoundException() {
+            UpdateCustomerDTO dto = createUpdateCustomerDTO();
+            String expectedErrorMessage = "Customer does not exists or is inactive";
+
+            mockFindActiveCustomerById(null);
+
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), dto)
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void updateCustomer_whenEmailIsAlreadyInUse_shouldThrowIllegalArgumentException() {
+            UpdateCustomerDTO dto = createUpdateCustomerDTO();
+            Customer customer = createCustomer();
+            String expectedErrorMessage = "Email already in use";
+
+            mockFindActiveCustomerById(customer);
+            mockExistsByActiveTrueAndEmailEqualsAndIdNot(true);
+
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.updateCustomer(UUID.randomUUID(), dto)
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void updateCustomer_whenDTOIsValid_shouldUpdateCustomer() {
+            UpdateCustomerDTO dto = createUpdateCustomerDTO();
+            Customer customerSpy = spy(createCustomer());
+
+            mockFindActiveCustomerById(customerSpy);
+            mockExistsByActiveTrueAndEmailEqualsAndIdNot(false);
+
+            Customer output = customerService.updateCustomer(UUID.randomUUID(), dto);
+
+            verify(customerSpy, times(1)).update(dto.getName(), dto.getEmail());
+            assertAll(
+                    () -> assertNotNull(output),
+                    () -> assertEquals(dto.getName(), output.getName()),
+                    () -> assertEquals(dto.getEmail(), output.getEmail())
+            );
+        }
+
+        private void mockExistsByActiveTrueAndEmailEqualsAndIdNot(Boolean expectedReturn) {
+            when(customerRepositoryMocked.existsByActiveTrueAndEmailEqualsAndIdNot(anyString(), any(UUID.class)))
+                    .thenReturn(expectedReturn);
+        }
     }
 
-    @Test
-    public void updateCustomer_whenCustomerIsNull_shouldThrowException(){
-        Long customerId = 1l;
-        CustomerUpdatedDTO customerUploadDTO = new CustomerUpdatedDTO("Roberto de Assis", "Roberto@email.com", mock(AdressDto.class));
+    @Nested
+    @DisplayName("inactivateCustomer tests")
+    class InactivateCustomerTest {
+        @Test
+        void inactivateCustomer_whenIdIsNull_shouldThrowIllegalArgumentException() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> customerService.inactivateCustomer(null)
+            );
+        }
 
-        when(customerRepository.getReferenceByIdAndActiveTrue(customerId)).thenReturn(null);
+        @Test
+        void inactivateCustomer_whenCustomerDoesNotExist_shouldThrowEntityNotFoundException() {
+            String expectedErrorMessage = "Customer does not exists or is inactive";
 
-        assertThrows(EntityNotFoundException.class, ()-> customerService.updateCustomer(customerId, customerUploadDTO));
-        verify(customerRepository, times(1)).getReferenceByIdAndActiveTrue(customerId);
+            mockFindActiveCustomerById(null);
+
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class,
+                    () -> customerService.inactivateCustomer(UUID.randomUUID())
+            );
+
+            assertEquals(expectedErrorMessage, exception.getMessage());
+        }
+
+        @Test
+        void inactivateCustomer_whenCustomerExists_shouldInactivate() {
+            Customer customerSpy = spy(createCustomer());
+
+            mockFindActiveCustomerById(customerSpy);
+
+            customerService.inactivateCustomer(UUID.randomUUID());
+
+            verify(customerSpy, times(1)).inactivate();
+            assertFalse(customerSpy.getActive());
+        }
     }
 
-    @Test
-    public void updateCustomer_whenCustomerIsNull_shouldReturnUpdatedCustomar(){
-        Long customerId = 1l;
-        CustomerUpdatedDTO customerUploadDTO = new CustomerUpdatedDTO("Roberto de Assis", "Roberto@email.com", mock(AdressDto.class));
-        Customer existingCustomer = mock(Customer.class);
-
-        when(customerRepository.getReferenceByIdAndActiveTrue(customerId)).thenReturn(existingCustomer);
-
-        customerService.updateCustomer(customerId, customerUploadDTO);
-
-        verify(existingCustomer, times(1)).updateInformation(customerUploadDTO);
-        verify(customerRepository, times(1)).getReferenceByIdAndActiveTrue(customerId);
+    private void mockFindActiveCustomerById(Customer expectedReturn) {
+        when(customerRepositoryMocked.findByIdAndActiveTrue(any(UUID.class)))
+                .thenReturn(Optional.ofNullable(expectedReturn));
     }
 }

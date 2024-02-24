@@ -4,9 +4,10 @@ import br.com.senior.burger_place.domain.occupation.Occupation;
 import br.com.senior.burger_place.domain.occupation.PaymentForm;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record ListOccupationDTO(
-        Long id,
+        UUID id,
         LocalDateTime beginOccupation,
         LocalDateTime endOccupation,
         PaymentForm paymentForm,

@@ -5,7 +5,6 @@ import br.com.senior.burger_place.domain.review.dto.ReviewRegisterDTO;
 import br.com.senior.burger_place.domain.review.dto.ReviewUpdateDTO;
 import br.com.senior.burger_place.domain.review.topicReview.TopicReview;
 import br.com.senior.burger_place.domain.review.topicReview.TopicReviewRepository;
-import br.com.senior.burger_place.domain.review.topicReview.dto.ListingTopicReviewDTO;
 import br.com.senior.burger_place.domain.review.topicReview.dto.TopicReviewRegisterDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ReviewService {
@@ -48,18 +48,18 @@ public class ReviewService {
         return new ListingReviewDTO(review);
     }
 
-    public ReviewRegisterDTO updateReview(Long id, ReviewUpdateDTO data) {
+    public ReviewRegisterDTO updateReview(UUID id, ReviewUpdateDTO data) {
         Optional<Review> optionalReview = repository.findById(id);
         if (optionalReview.isEmpty()) {
             throw new EntityNotFoundException("Avaliação não existe");
         }
         Review review = optionalReview.get();
         review.updateInformation(data);
-        ReviewRegisterDTO responseData = new ReviewRegisterDTO(review.getOccupation().getId(), review.getComment(),List.of());
+        ReviewRegisterDTO responseData = new ReviewRegisterDTO(review.getOccupation().getId(), review.getComment(), List.of());
         return responseData;
     }
 
-    public void deleteReview(Long id) {
+    public void deleteReview(UUID id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Avaliação não existe");
         }
@@ -70,7 +70,7 @@ public class ReviewService {
         return repository.findAll(pageable);
     }
 
-    public ListingReviewDTO listReviewById(Long id) {
+    public ListingReviewDTO listReviewById(UUID id) {
         Optional<Review> optionalReview = repository.findById(id);
         if (optionalReview.isEmpty()) {
             throw new EntityNotFoundException("Avaliação não existe");

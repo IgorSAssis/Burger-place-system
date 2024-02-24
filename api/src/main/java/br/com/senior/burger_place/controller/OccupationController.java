@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("occupations")
@@ -29,7 +30,7 @@ public class OccupationController {
     @GetMapping("/{occupationId}")
     public ResponseEntity<OccupationDTO> showOccupation(
             @PathVariable
-            Long occupationId
+            UUID occupationId
     ) {
         Optional<OccupationDTO> orderOptional = this.occupationService.showOccupation(occupationId);
 
@@ -59,7 +60,7 @@ public class OccupationController {
     @Transactional
     public ResponseEntity<Void> addOrderItems(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @RequestBody
             @Valid
             AddOrderItemsDTO itemsDTO
@@ -73,7 +74,7 @@ public class OccupationController {
     @Transactional
     public ResponseEntity<Void> removeOrderItems(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @RequestBody
             @Valid
             RemoveOrderItemsDTO itemsDTO
@@ -87,9 +88,9 @@ public class OccupationController {
     @Transactional
     public ResponseEntity updateOrder(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @PathVariable
-            Long itemId,
+            UUID itemId,
             @RequestBody
             @Valid
             UpdateOrderItemDTO itemDTO
@@ -103,7 +104,7 @@ public class OccupationController {
     @Transactional
     public ResponseEntity inactivateOrder(
             @PathVariable
-            Long occupationId
+            UUID occupationId
     ) {
         this.occupationService.inactivateOccupation(occupationId);
 
@@ -114,9 +115,9 @@ public class OccupationController {
     @Transactional
     public ResponseEntity startOrderItemPreparation(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @PathVariable
-            Long itemId
+            UUID itemId
     ) {
         this.occupationService.startOrderItemPreparation(occupationId, itemId);
 
@@ -127,9 +128,9 @@ public class OccupationController {
     @Transactional
     public ResponseEntity finishOrderItemPreparation(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @PathVariable
-            Long itemId
+            UUID itemId
     ) {
         this.occupationService.finishOrderItemPreparation(occupationId, itemId);
 
@@ -140,9 +141,9 @@ public class OccupationController {
     @Transactional
     public ResponseEntity deliverOrderItemPreparation(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @PathVariable
-            Long itemId
+            UUID itemId
     ) {
         this.occupationService.deliverOrderItem(occupationId, itemId);
 
@@ -153,9 +154,9 @@ public class OccupationController {
     @Transactional
     public ResponseEntity cancelOrderItem(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @PathVariable
-            Long itemId
+            UUID itemId
     ) {
         this.occupationService.cancelOrderItem(occupationId, itemId);
 
@@ -166,7 +167,7 @@ public class OccupationController {
     @Transactional
     public ResponseEntity finishOccupation(
             @PathVariable
-            Long occupationId,
+            UUID occupationId,
             @RequestBody
             @Valid
             FinishOccupationDTO occupationDTO

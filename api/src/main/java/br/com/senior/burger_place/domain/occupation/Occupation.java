@@ -4,26 +4,26 @@ import br.com.senior.burger_place.domain.board.Board;
 import br.com.senior.burger_place.domain.customer.Customer;
 import br.com.senior.burger_place.domain.occupation.dto.FinishOccupationDTO;
 import br.com.senior.burger_place.domain.orderItem.OrderItem;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(name = "occupations")
 @Entity(name = "Occupation")
 @ToString
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Occupation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private LocalDateTime beginOccupation;
     private LocalDateTime endOccupation;
     private Integer peopleCount;
@@ -49,7 +49,7 @@ public class Occupation {
         this.active = true;
     }
 
-    public Occupation(Long occupationId) {
+    public Occupation(UUID occupationId) {
         this.id = occupationId;
     }
 

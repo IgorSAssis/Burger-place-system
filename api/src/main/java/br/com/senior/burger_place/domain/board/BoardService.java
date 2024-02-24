@@ -1,96 +1,126 @@
 package br.com.senior.burger_place.domain.board;
 
-import br.com.senior.burger_place.domain.board.dto.BoardRegisterDTO;
-import br.com.senior.burger_place.domain.board.dto.BoardUpdateDTO;
-import br.com.senior.burger_place.domain.occupation.Occupation;
-import br.com.senior.burger_place.domain.occupation.OccupationRepository;
+import br.com.senior.burger_place.domain.board.dto.CreateBoardDTO;
+import br.com.senior.burger_place.domain.board.dto.UpdateBoardDTO;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class BoardService {
-
     @Autowired
-    BoardRepository repository;
-
+    private BoardRepository boardRepository;
     @Autowired
-    OccupationRepository occupationRepository;
+    private BoardSpecification boardSpecification;
 
-    public Board addBoard(BoardRegisterDTO data) {
-        if (repository.existsByNumber(data.number())) {
-            throw new DuplicateKeyException("Já existe uma mesa cadastrada com esse número");
-        }
-        return repository.save(new Board(data));
+    public Page<Board> listBoards(
+            Pageable pageable,
+            Integer boardNumber,
+            Integer capacity,
+            BoardLocation boardLocation,
+            Boolean active,
+            Boolean occupied
+    ) {
+        Specification<Board> specification = this.boardSpecification.applyFilters(
+                boardNumber,
+                capacity,
+                boardLocation,
+                active,
+                occupied
+        );
+
+        return this.boardRepository.findAll(specification, pageable);
     }
 
-    public void updateBoard(Long id, BoardUpdateDTO data) {
-        Optional<Board> optionalBoard = repository.findById(id);
-        if (optionalBoard.isEmpty()) {
-            throw new EntityNotFoundException("Mesa não cadastrada");
-        }
-        Board board = optionalBoard.get();
-        board.updateInformation(data);
+    public Board showBoard(
+            @NonNull
+            UUID boardId
+    ) {
+        return this.boardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("Board does not exist"));
     }
 
-    public Board listBoardsById(Long id) {
-        Board board = repository.getReferenceByIdAndActiveTrue(id);
-        if (board == null) {
-            throw new EntityNotFoundException("Mesa não existe");
+    @Transactional
+    public Board createBoard(
+            @NonNull
+            @Valid
+            CreateBoardDTO dto
+    ) {
+        if (this.boardRepository.existsByNumberAndActiveTrue(dto.getBoardNumber())) {
+            throw new DuplicateKeyException("Board with number already exists");
         }
+
+        Board board = Board.builder()
+                .number(dto.getBoardNumber())
+                .capacity(dto.getCapacity())
+                .location(dto.getBoardLocation())
+                .build();
+
+        return this.boardRepository.save(board);
+    }
+
+    @Transactional
+    public Board updateBoard(
+            @NonNull
+            UUID boardId,
+            @NonNull
+            @Valid
+            UpdateBoardDTO dto
+    ) {
+        Board board = this.boardRepository.findByIdAndActiveTrue(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("Board does not exists or is inactive"));
+
+        if (board.getOccupied()) {
+            throw new IllegalStateException("Cannot update occupied board");
+        }
+
+        if (this.boardRepository.existsByNumberAndActiveTrueAndIdNot(dto.getBoardNumber(), boardId)) {
+            throw new IllegalArgumentException("Board number unavailable");
+        }
+
+        board.update(dto.getBoardLocation(), dto.getCapacity(), dto.getBoardNumber());
+
         return board;
     }
 
-    public Board verifyOccupiedBoard(Long id) {
-        Board board = listBoardsById(id);
-        if (repository.isBoardOccupied(id)) {
-            throw new EntityNotFoundException("A mesa já está ocupada");
-        }
-        return board;
+    @Transactional
+    public void inactivateBoard(
+            @NonNull
+            UUID boardId
+    ) {
+        Board board = this.findActiveBoardById(boardId);
+        board.inactivate();
     }
 
-    public Page<Board> listAllBoards(Pageable pageable) {
-        return repository.findAllBoardsAvailable(pageable);
-
+    @Transactional
+    public void occupyBoard(
+            @NonNull
+            UUID boardId
+    ) {
+        Board board = this.findActiveBoardById(boardId);
+        board.occupy();
     }
 
-    public Page<Board> listAvailableBoardsByLocationAndOccupation(BoardLocation location, Pageable pageable) {
-        Page<Board> boards = repository.findByLocationAndActiveTrue(location, pageable);
-        List<Board> filteredBoards = boards.getContent().stream()
-                .filter(board -> !isBoardOccupied(board.getId()))
-                .collect(Collectors.toList());
-        return new PageImpl<>(filteredBoards, pageable, filteredBoards.size());
+    @Transactional
+    public void vacateBoard(
+            @NonNull
+            UUID boardId
+    ) {
+        Board board = this.findActiveBoardById(boardId);
+        board.vacate();
     }
 
-    public Page<Board> listAvailableBoardsByCapacityAndOccupation(Integer capacity, Pageable pageable) {
-        Page<Board> boards = repository.findByCapacityAndActiveTrue(capacity, pageable);
-        List<Board> filteredBoards = boards.getContent().stream()
-                .filter(board -> !isBoardOccupied(board.getId()))
-                .collect(Collectors.toList());
-        return new PageImpl<>(filteredBoards, pageable, filteredBoards.size());
-    }
-
-    public Page<Board> listAvailableBoardsByLocationAndCapacityAndOccupation(
-            BoardLocation location, Integer capacity, Pageable pageable) {
-
-        Page<Board> boards = repository.findByLocationAndCapacityAndActiveTrue(location, capacity, pageable);
-        List<Board> filteredBoards = boards.getContent().stream()
-                .filter(board -> !isBoardOccupied(board.getId()))
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(filteredBoards, pageable, filteredBoards.size());
-    }
-
-    public boolean isBoardOccupied(Long boardId) {
-        Occupation occupation = occupationRepository.findFirstByBoardIdOrderByBeginOccupationDesc(boardId);
-        return occupation != null && occupation.getEndOccupation() == null;
+    private Board findActiveBoardById(UUID boardId) {
+        return this.boardRepository.findByIdAndActiveTrue(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("Board does not exists or is inactive"));
     }
 }

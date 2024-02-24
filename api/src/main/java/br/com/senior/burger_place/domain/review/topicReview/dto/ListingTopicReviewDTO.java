@@ -3,8 +3,10 @@ package br.com.senior.burger_place.domain.review.topicReview.dto;
 import br.com.senior.burger_place.domain.review.topicReview.Category;
 import br.com.senior.burger_place.domain.review.topicReview.TopicReview;
 
+import java.util.UUID;
+
 public record ListingTopicReviewDTO(
-        Long id,
+        UUID id,
         int grade,
         Category category
 

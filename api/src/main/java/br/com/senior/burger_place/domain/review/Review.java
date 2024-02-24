@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,8 +22,8 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Review {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private String comment;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "occupation_id")
@@ -33,7 +34,7 @@ public class Review {
     @JoinColumn(name = "review_id")
     private List<TopicReview> topicReviews;
 
-    public Review(Long occupationId, String comment) {
+    public Review(UUID occupationId, String comment) {
         if (comment != null && !comment.trim().isEmpty()) {
             this.comment = comment;
         }

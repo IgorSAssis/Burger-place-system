@@ -1,62 +1,64 @@
 package br.com.senior.burger_place.domain.product;
 
-import br.com.senior.burger_place.domain.product.dto.UpdateProductDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@EqualsAndHashCode(of = "id")
 @Table(name = "products")
 @Entity(name = "Product")
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private String name;
-    private double price;
+    private Double price;
     private String ingredients;
     @Enumerated(EnumType.STRING)
     private ProductCategory category;
     private String url;
-    private boolean active;
+    @Builder.Default
+    private Boolean active = true;
 
-    public Product(String name, String ingredients, Double price, ProductCategory category, String url) {
-        this.name = name;
-        this.ingredients = ingredients;
-        this.price = price;
-        this.category = category;
-        this.url = url;
-        this.active = true;
-    }
-
-    public void update(UpdateProductDTO productData) {
-        if (productData.name() != null) {
-            this.name = productData.name();
+    public void update(
+            String newName,
+            String newIngredients,
+            Double newPrice,
+            ProductCategory newCategory,
+            String newUrl
+    ) {
+        if (newName != null) {
+            this.name = newName;
         }
 
-        if (productData.ingredients() != null) {
-            this.ingredients = productData.ingredients();
+        if (newIngredients != null) {
+            this.ingredients = newIngredients;
         }
 
-        if (productData.price() != null && productData.price() > 0) {
-            this.price = productData.price();
+        if (newPrice != null && newPrice > 0) {
+            this.price = newPrice;
         }
 
-        if (productData.category() != null) {
-            this.category = productData.category();
+        if (newCategory != null) {
+            this.category = newCategory;
         }
 
-        if (productData.url() != null) {
-            this.url = productData.url();
+        if (newUrl != null) {
+            this.url = newUrl;
         }
     }
 
     public void inactivate() {
+        if (!this.active) {
+            throw new IllegalStateException("Product already inactive");
+        }
+
         this.active = false;
     }
 }

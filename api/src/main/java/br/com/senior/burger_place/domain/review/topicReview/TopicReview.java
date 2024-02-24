@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,13 +22,13 @@ import java.util.NoSuchElementException;
 public class TopicReview {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private Integer grade;
     @Enumerated(EnumType.STRING)
     private Category category;
     @Column(name = "review_id")
-    private Long reviewId;
+    private UUID reviewId;
 
     public TopicReview(ListingTopicReviewDTO dto) {
         if (dto.grade() < 1 || dto.grade() > 5) {
@@ -39,7 +40,7 @@ public class TopicReview {
         this.grade = dto.grade();
     }
 
-    public TopicReview(Integer grade, Category category, Long reviewId) {
+    public TopicReview(Integer grade, Category category, UUID reviewId) {
         this.grade = grade;
         this.category = category;
         this.reviewId = reviewId;
