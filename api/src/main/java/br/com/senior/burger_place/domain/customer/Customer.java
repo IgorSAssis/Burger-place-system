@@ -23,15 +23,15 @@ public class Customer {
     private Boolean active = true;
 
     public void update(
-            String name,
-            String email
+            String newName,
+            String newEmail
     ) {
-        if (name != null) {
-            this.name = name;
+        if (newName != null) {
+            this.name = newName;
         }
 
-        if (email != null) {
-            this.email = email;
+        if (newEmail != null) {
+            this.email = newEmail;
         }
     }
 

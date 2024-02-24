@@ -4,7 +4,6 @@ import br.com.senior.burger_place.domain.board.Board;
 import br.com.senior.burger_place.domain.customer.Customer;
 import br.com.senior.burger_place.domain.occupation.dto.FinishOccupationDTO;
 import br.com.senior.burger_place.domain.orderItem.OrderItem;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,10 +16,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(name = "occupations")
 @Entity(name = "Occupation")
 @ToString
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Occupation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

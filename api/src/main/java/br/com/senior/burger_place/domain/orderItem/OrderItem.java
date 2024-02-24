@@ -1,13 +1,9 @@
 package br.com.senior.burger_place.domain.orderItem;
 
 import br.com.senior.burger_place.domain.occupation.Occupation;
-import br.com.senior.burger_place.domain.occupation.dto.UpdateOrderItemDTO;
 import br.com.senior.burger_place.domain.product.Product;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
@@ -15,6 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
+@Builder
 @EqualsAndHashCode(of = "id")
 @Table(name = "order_items")
 @Entity(name = "OrderItem")
@@ -34,41 +32,24 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "occupation_id")
     private Occupation occupation;
-    private boolean active;
-
-    public OrderItem(int amount, double itemValue, Product product) {
-        this.amount = amount;
-        this.itemValue = itemValue;
-        this.product = product;
-        this.active = true;
-    }
-
-    public OrderItem(
-            int amount,
-            double itemValue,
-            Product product,
-            Occupation occupation,
-            String observation
-    ) {
-        this(amount, itemValue, product);
-        this.occupation = occupation;
-        this.observation = observation;
-        this.status = OrderItemStatus.RECEBIDO;
-    }
+    @Builder.Default
+    private boolean active = true;
 
     public void inactivate() {
+        if (!this.active) {
+            throw new IllegalStateException("Order item already inactive");
+        }
+
         this.active = false;
     }
 
-    public void update(UpdateOrderItemDTO itemDTO) {
-        if (itemDTO.amount() != null && itemDTO.amount() > 0) {
-            this.amount = itemDTO.amount();
+    public void update(Integer newAmount, String newObservation) {
+        if (newAmount != null) {
+            this.amount = newAmount;
         }
 
-        if (itemDTO.observation() != null) {
-            this.observation = itemDTO.observation().isEmpty()
-                    ? null
-                    : itemDTO.observation();
+        if (newObservation != null) {
+            this.observation = newObservation;
         }
     }
 

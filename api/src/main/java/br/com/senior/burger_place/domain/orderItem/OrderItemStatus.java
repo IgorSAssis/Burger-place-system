@@ -5,5 +5,5 @@ public enum OrderItemStatus {
     EM_ANDAMENTO,
     PRONTO,
     ENTREGUE,
-    CANCELADO;
+    CANCELADO
 }

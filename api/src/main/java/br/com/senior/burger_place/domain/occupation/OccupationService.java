@@ -147,22 +147,22 @@ public class OccupationService {
             throw new EntityNotFoundException("Existem produtos inválidos");
         }
 
-        List<OrderItem> orderItems = itemsDTO.orderItems().stream().map(item -> {
-            Product product = products.stream()
-                    .filter(p -> Objects.equals(p.getId(), item.productId()))
-                    .findFirst()
-                    .get();
+//        List<OrderItem> orderItems = itemsDTO.orderItems().stream().map(item -> {
+//            Product product = products.stream()
+//                    .filter(p -> Objects.equals(p.getId(), item.productId()))
+//                    .findFirst()
+//                    .get();
+//
+//            return new OrderItem(
+//                    item.amount(),
+//                    product.getPrice(),
+//                    product,
+//                    occupation,
+//                    item.observation()
+//            );
+//        }).toList();
 
-            return new OrderItem(
-                    item.amount(),
-                    product.getPrice(),
-                    product,
-                    occupation,
-                    item.observation()
-            );
-        }).toList();
-
-        this.orderItemRepository.saveAll(orderItems);
+        this.orderItemRepository.saveAll(null);
     }
 
     public void removeOrderItems(UUID occupationId, RemoveOrderItemsDTO itemsDTO) {
@@ -221,7 +221,7 @@ public class OccupationService {
             throw new IllegalStateException("O item já foi entregue e, portanto, não pode ser mais alterado");
         }
 
-        item.update(itemDTO);
+//        item.update(itemDTO);
     }
 
     public void inactivateOccupation(UUID occupationId) {

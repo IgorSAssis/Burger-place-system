@@ -1,10 +1,14 @@
 package br.com.senior.burger_place.controller;
 
+import br.com.senior.burger_place.domain.orderItem.OrderItem;
+import br.com.senior.burger_place.domain.orderItem.OrderItemConverter;
 import br.com.senior.burger_place.domain.orderItem.OrderItemService;
 import br.com.senior.burger_place.domain.orderItem.OrderItemStatus;
-import br.com.senior.burger_place.domain.orderItem.dto.ListOrderItemsDTO;
-import br.com.senior.burger_place.utils.OrderItemTestFactory;
+import br.com.senior.burger_place.domain.orderItem.dto.OrderItemDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -24,128 +28,64 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-@WebMvcTest(controllers = OrderItemController.class)
+import static utils.OrderItemCreator.createOrderItem;
+import static utils.OrderItemCreator.createOrderItemDTO;
+
+@WebMvcTest(controllers = {OrderItemController.class})
 @ExtendWith(MockitoExtension.class)
+@DisplayName("OrderItemController integration tests")
 public class OrderItemControllerTest {
-//    @Autowired
-//    private MockMvc mockMvc;
-//    @Autowired
-//    private OrderItemController orderItemController;
-//    @MockBean
-//    private OrderItemService orderItemService;
-//
-//    @Test
-//    void listOrderItemsByStatus_whenStatusIsNull_shouldReturnStatus200WithOrderItems() throws Exception {
-//        ResultActions response = this.mockMvc
-//                .perform(
-//                        MockMvcRequestBuilders.get("/order-items")
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                );
-//
-//        response
-//                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-//                .andDo(MockMvcResultHandlers.print());
-//
-//    }
-//
-//    @Test
-//    void listOrderItemsByStatus_whenStatusIsNow_shouldReturnStatus200WithOrderItems() throws Exception {
-//        List<ListOrderItemsDTO> someListOrderItemsDTOs = List.of(
-//                new ListOrderItemsDTO(OrderItemTestFactory.orderItemFactory(1L)),
-//                new ListOrderItemsDTO(OrderItemTestFactory.orderItemFactory(2L))
-//        );
-//
-//        Page<ListOrderItemsDTO> page = new PageImpl<>(someListOrderItemsDTOs, Pageable.ofSize(5), 20);
-//
-//        Mockito.when(
-//                this.orderItemService.listPendingOrderItems(
-//                        Mockito.any(Pageable.class),
-//                        Mockito.any(OrderItemStatus.class)
-//                )
-//        ).thenReturn(page);
-//
-//        ResultActions response = this.mockMvc
-//                .perform(
-//                        MockMvcRequestBuilders.get("/order-items")
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                                .queryParam("status", OrderItemStatus.ENTREGUE.name())
-//                );
-//
-//        response
-//                .andExpect(MockMvcResultMatchers.status().isOk())
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content.size()",
-//                        CoreMatchers.is(2)
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].id",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).id()),
-//                        Long.class
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].productName",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).productName())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].ingredients",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).ingredients())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].amount",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).amount())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].observation",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).observation())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].boardNumber",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).boardNumber())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].status",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).status().name())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[0].occupationId",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(0).occupationId()),
-//                        Long.class
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].id",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).id()),
-//                        Long.class
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].productName",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).productName())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].ingredients",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).ingredients())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].amount",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).amount())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].observation",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).observation())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].boardNumber",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).boardNumber())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].status",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).status().name())
-//                ))
-//                .andExpect(MockMvcResultMatchers.jsonPath(
-//                        "$.content[1].occupationId",
-//                        CoreMatchers.is(someListOrderItemsDTOs.get(1).occupationId()),
-//                        Long.class
-//                ))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//    }
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private OrderItemController orderItemController;
+    @MockBean
+    private OrderItemService orderItemServiceMocked;
+    @MockBean
+    private OrderItemConverter orderItemConverterMocked;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Nested
+    @DisplayName("listByStatus tests")
+    class ListByStatusTest {
+        @Test
+        void listByStatus_whenStatusHasBeenInformed_shouldReturnStatus200WithPageOfOrderItemDTO() throws Exception {
+            OrderItem orderItem = createOrderItem();
+            OrderItemDTO orderItemDTO = createOrderItemDTO();
+            orderItemDTO.setId(orderItem.getId());
+
+            List<OrderItem> orderItems = List.of(orderItem);
+            Page<OrderItem> orderItemPage = new PageImpl<>(orderItems, Pageable.ofSize(20), orderItems.size());
+
+            mockListOrderItems(orderItemPage);
+            mockToOrderItemDTO(orderItem, orderItemDTO);
+
+            ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/order-items")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .queryParam("status", OrderItemStatus.ENTREGUE.name())
+            );
+
+            response
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.jsonPath(
+                            "$.content.size()",
+                            CoreMatchers.is(orderItemPage.getContent().size()))
+                    )
+                    .andDo(MockMvcResultHandlers.print());
+        }
+
+
+        private void mockListOrderItems(Page<OrderItem> expectedReturn) {
+            Mockito.when(
+                    orderItemServiceMocked.listOrderItems(Mockito.any(Pageable.class), Mockito.any(OrderItemStatus.class))
+            ).thenReturn(expectedReturn);
+        }
+    }
+
+    private void mockToOrderItemDTO(OrderItem item, OrderItemDTO expectedReturn) {
+        Mockito.when(
+                orderItemConverterMocked.toOrderItemsDTO(item)
+        ).thenReturn(expectedReturn);
+    }
 }

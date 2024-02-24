@@ -1,8 +1,9 @@
 package br.com.senior.burger_place.controller;
 
+import br.com.senior.burger_place.domain.orderItem.OrderItemConverter;
 import br.com.senior.burger_place.domain.orderItem.OrderItemService;
 import br.com.senior.burger_place.domain.orderItem.OrderItemStatus;
-import br.com.senior.burger_place.domain.orderItem.dto.ListOrderItemsDTO;
+import br.com.senior.burger_place.domain.orderItem.dto.OrderItemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,14 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderItemController {
     @Autowired
     private OrderItemService orderItemService;
+    @Autowired
+    private OrderItemConverter orderItemConverter;
 
     @GetMapping
-    public ResponseEntity<Page<ListOrderItemsDTO>> listOrderItemsByStatus(
+    public ResponseEntity<Page<OrderItemDTO>> listByStatus(
             @PageableDefault(size = 5)
             Pageable pageable,
             @RequestParam(name = "status", required = true)
             OrderItemStatus status
     ) {
-        return ResponseEntity.ok(this.orderItemService.listPendingOrderItems(pageable, status));
+        return ResponseEntity.ok(
+                this.orderItemService.listOrderItems(pageable, status).map(this.orderItemConverter::toOrderItemsDTO)
+        );
     }
 }
