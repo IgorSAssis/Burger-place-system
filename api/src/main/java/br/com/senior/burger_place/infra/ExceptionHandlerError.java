@@ -19,7 +19,6 @@ import java.util.NoSuchElementException;
 public class ExceptionHandlerError {
 
     @ExceptionHandler({
-            DuplicateKeyException.class,
             EntityNotFoundException.class
     })
     public ResponseEntity<SimpleResponseError> handleNotFound(Exception exception) {
@@ -27,6 +26,7 @@ public class ExceptionHandlerError {
     }
 
     @ExceptionHandler({
+            DuplicateKeyException.class,
             NoSuchElementException.class,
             IllegalArgumentException.class
     })

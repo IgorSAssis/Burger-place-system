@@ -46,9 +46,8 @@ class BoardServiceTest {
             List<Board> boards = List.of(createBoard());
             Page<Board> boardsPage = new PageImpl<>(boards, Pageable.ofSize(20), 20);
 
-            when(boardSpecificationMocked.applyFilters(null, null, null, null, null))
-                    .thenReturn(Specification.where(null));
-            when(boardRepositoryMocked.findAll(eq(Specification.where(null)), any(Pageable.class))).thenReturn(boardsPage);
+            mockApplyFilters(Specification.where(null));
+            mockFindAll(boardsPage);
 
             List<Board> output = boardService.listBoards(
                     boardsPage.getPageable(), null, null, null, null, null
@@ -65,9 +64,8 @@ class BoardServiceTest {
         void listBoards_whenDoNotExistBoards_shouldReturnEmptyPage() {
             Page<Board> boardsPage = new PageImpl<>(List.of(), Pageable.ofSize(20), 20);
 
-            when(boardSpecificationMocked.applyFilters(null, null, null, null, null))
-                    .thenReturn(Specification.where(null));
-            when(boardRepositoryMocked.findAll(eq(Specification.where(null)), any(Pageable.class))).thenReturn(boardsPage);
+            mockApplyFilters(Specification.where(null));
+            mockFindAll(boardsPage);
 
             List<Board> output = boardService.listBoards(
                     boardsPage.getPageable(), null, null, null, null, null
@@ -78,6 +76,17 @@ class BoardServiceTest {
                     () -> assertTrue(output.isEmpty())
             );
 
+        }
+
+        private void mockApplyFilters(Specification<Board> expectedReturn) {
+            when(boardSpecificationMocked.applyFilters(
+                    null, null, null, null, null)
+            ).thenReturn(expectedReturn);
+        }
+
+        private void mockFindAll(Page<Board> expectedReturn) {
+            when(boardRepositoryMocked.findAll(eq(Specification.where(null)), any(Pageable.class)))
+                    .thenReturn(expectedReturn);
         }
     }
 
