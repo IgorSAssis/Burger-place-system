@@ -10,9 +10,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(of = "id")
 @Table(name = "products")
 @Entity(name = "Product")
-@EqualsAndHashCode
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

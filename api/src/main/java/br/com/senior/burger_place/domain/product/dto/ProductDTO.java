@@ -10,8 +10,8 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Builder
 @EqualsAndHashCode(of = "id")
+@Builder
 public class ProductDTO {
     private UUID id;
     private String name;

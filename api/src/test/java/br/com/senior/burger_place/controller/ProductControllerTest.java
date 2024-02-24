@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +46,9 @@ class ProductControllerTest {
     @Autowired
     private ProductController productController;
     @MockBean
-    private ProductService productServiceMocked;
+    private ProductService productService;
     @MockBean
-    private ProductConverter productConverterMocked;
+    private ProductConverter productConverter;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -60,7 +58,7 @@ class ProductControllerTest {
         @Test
         void list_whenExistProducts_shouldReturnStatus200AndPageWithProductDTO() throws Exception {
             List<Product> products = List.of(createProduct(), createProduct());
-            Page<Product> productPage = new PageImpl<>(products, Pageable.ofSize(10), 10);
+            Page<Product> productPage = new PageImpl<>(products, Pageable.ofSize(10), 20);
 
             mockListProducts(productPage);
             mockToProductDTO(products.get(0), createProductDTO());
@@ -72,22 +70,21 @@ class ProductControllerTest {
                             .queryParam("name", "Hamburger")
                             .queryParam("price", "29.8")
                             .queryParam("ingredients", "tomate")
-                            .queryParam("category", "BURGER")
+                            .queryParam("category", ProductCategory.DRINK.name())
                             .queryParam("active", "true")
                     );
 
             response
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.jsonPath(
-                            "$.content.size()",
-                            CoreMatchers.is(products.size())
+                            "$.content.size()", CoreMatchers.is(products.size())
                     ))
                     .andDo(MockMvcResultHandlers.print());
         }
 
         @Test
-        void list_whenExistProducts_shouldReturnStatus200AndEmptyPage() throws Exception {
-            Page<Product> productPage = new PageImpl<>(List.of(), Pageable.ofSize(10), 10);
+        void list_whenProductsDoNotExist_shouldReturnStatus200AndEmptyPage() throws Exception {
+            Page<Product> productPage = new PageImpl<>(List.of(), Pageable.ofSize(10), 0);
 
             mockListProducts(productPage);
 
@@ -97,21 +94,20 @@ class ProductControllerTest {
                             .queryParam("name", "Hamburger")
                             .queryParam("price", "29.8")
                             .queryParam("ingredients", "tomate")
-                            .queryParam("category", "BURGER")
+                            .queryParam("category", ProductCategory.BURGER.name())
                             .queryParam("active", "true")
                     );
 
             response
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.jsonPath(
-                            "$.content.size()",
-                            CoreMatchers.is(0)
+                            "$.content.size()", CoreMatchers.is(0)
                     ))
                     .andDo(MockMvcResultHandlers.print());
         }
 
         private void mockListProducts(Page<Product> expectedReturn) {
-            Mockito.when(productServiceMocked.listProducts(
+            Mockito.when(productService.listProducts(
                     Mockito.any(Pageable.class),
                     Mockito.anyString(),
                     Mockito.anyDouble(),
@@ -126,17 +122,19 @@ class ProductControllerTest {
     @DisplayName("show tests")
     class ShowTest {
         @Test
-        void show_whenProductExists_shouldReturnStatus200AndProductDTO() throws Exception {
+        void show_whenProductExist_shouldReturnStatus200AndProductDTO() throws Exception {
             Product product = createProduct();
             ProductDTO productDTO = createProductDTO();
             productDTO.setId(product.getId());
 
-            mockShowProduct(product);
+            Mockito.when(productService.showProduct(Mockito.any(UUID.class)))
+                    .thenReturn(product);
             mockToProductDTO(product, productDTO);
 
-            ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/products/{id}", product.getId())
-                            .contentType(MediaType.APPLICATION_JSON));
+            ResultActions response = mockMvc
+                    .perform(MockMvcRequestBuilders.get("/products/{id}", UUID.randomUUID().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                    );
 
             response
                     .andExpect(MockMvcResultMatchers.status().isOk())
@@ -146,14 +144,10 @@ class ProductControllerTest {
                                 ProductDTO.class
                         );
 
+                        assertNotNull(output);
                         assertEquals(productDTO, output);
                     })
                     .andDo(MockMvcResultHandlers.print());
-        }
-
-        private void mockShowProduct(Product expectedReturn) {
-            Mockito.when(productServiceMocked.showProduct(Mockito.any(UUID.class)))
-                    .thenReturn(expectedReturn);
         }
     }
 
@@ -161,11 +155,12 @@ class ProductControllerTest {
     @DisplayName("create tests")
     class CreateTest {
         @ParameterizedTest
-        @NullAndEmptySource
-        void create_whenDTONameIsInvalid_shouldReturnStatus400WithError(String name) throws Exception {
+        @CsvSource({
+                ",Product name cannot be null or blank",
+                "'',Product name cannot be null or blank"
+        })
+        void create_whenNameIsInvalid_shouldReturnStatus400WithError(String name, String expectedErrorMessage) throws Exception {
             String field = "name";
-            String expectedErrorMessage = "Product name cannot be null or blank";
-
             CreateProductDTO createProductDTO = createCreateProductDTO();
             createProductDTO.setName(name);
 
@@ -188,18 +183,18 @@ class ProductControllerTest {
                                 () -> assertEquals(1, output.getErrors().size()),
                                 () -> assertEquals(field, output.getErrors().get(0).getField()),
                                 () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
         }
 
         @ParameterizedTest
-        @NullAndEmptySource
-        void create_whenDTOIngredientsIsInvalid_shouldReturnStatus400WithError(String ingredients) throws Exception {
+        @CsvSource({
+                ",Product ingredients cannot be null or blank",
+                "'',Product ingredients cannot be null or blank"
+        })
+        void create_whenIngredientsIsInvalid_shouldReturnStatus400WithError(String ingredients, String expectedErrorMessage) throws Exception {
             String field = "ingredients";
-            String expectedErrorMessage = "Product ingredients cannot be null or blank";
-
             CreateProductDTO createProductDTO = createCreateProductDTO();
             createProductDTO.setIngredients(ingredients);
 
@@ -222,7 +217,6 @@ class ProductControllerTest {
                                 () -> assertEquals(1, output.getErrors().size()),
                                 () -> assertEquals(field, output.getErrors().get(0).getField()),
                                 () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
@@ -232,12 +226,10 @@ class ProductControllerTest {
         @CsvSource({
                 ",Product price cannot be null",
                 "0,Product price must be higher than zero",
-                "-1,Product price must be higher than zero",
-                "-10,Product price must be higher than zero"
+                "-10,Product price must be higher than zero",
         })
-        void create_whenDTOPriceIsInvalid_shouldReturnStatus400WithError(Double price, String expectedErrorMessage) throws Exception {
+        void create_whenPriceIsInvalid_shouldReturnStatus400WithError(Double price, String expectedErrorMessage) throws Exception {
             String field = "price";
-
             CreateProductDTO createProductDTO = createCreateProductDTO();
             createProductDTO.setPrice(price);
 
@@ -260,17 +252,15 @@ class ProductControllerTest {
                                 () -> assertEquals(1, output.getErrors().size()),
                                 () -> assertEquals(field, output.getErrors().get(0).getField()),
                                 () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
         }
 
         @Test
-        void create_whenDTOCategoryIsInvalid_shouldReturnStatus400WithError() throws Exception {
+        void create_whenCategoryIsInvalid_shouldReturnStatus400WithError() throws Exception {
             String field = "category";
             String expectedErrorMessage = "Product category cannot be null";
-
             CreateProductDTO createProductDTO = createCreateProductDTO();
             createProductDTO.setCategory(null);
 
@@ -293,14 +283,13 @@ class ProductControllerTest {
                                 () -> assertEquals(1, output.getErrors().size()),
                                 () -> assertEquals(field, output.getErrors().get(0).getField()),
                                 () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
         }
 
         @Test
-        void create_whenDTOValid_shouldReturnStatus201WithProductDTO() throws Exception {
+        void create_whenDTOIsValid_shouldReturnStatus201WithProductDTOAndLocation() throws Exception {
             CreateProductDTO createProductDTO = createCreateProductDTO();
             Product product = createProduct();
             ProductDTO productDTO = createProductDTO();
@@ -330,14 +319,13 @@ class ProductControllerTest {
                                 () -> assertEquals(productDTO, output),
                                 () -> assertNotNull(result.getResponse().getRedirectedUrl()),
                                 () -> assertTrue(result.getResponse().getRedirectedUrl().contains(expectedCreatedResource))
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
         }
 
         private void mockCreateProduct(Product expectedReturn) {
-            Mockito.when(productServiceMocked.createProduct(Mockito.any(CreateProductDTO.class)))
+            Mockito.when(productService.createProduct(Mockito.any(CreateProductDTO.class)))
                     .thenReturn(expectedReturn);
         }
     }
@@ -346,11 +334,12 @@ class ProductControllerTest {
     @DisplayName("update tests")
     class UpdateTest {
         @ParameterizedTest
-        @ValueSource(doubles = {0, -1, -2})
-        void update_whenPriceIsInvalid_shouldReturnStatus400WithError(Double price) throws Exception {
+        @CsvSource({
+                "0,Product price must be higher than zero",
+                "-10,Product price must be higher than zero"
+        })
+        void update_whenPriceIsInvalid_shouldReturnStatus400WithError(Double price, String expectedErrorMessage) throws Exception {
             String field = "price";
-            String expectedErrorMessage = "Product price must be higher than zero";
-
             UpdateProductDTO updateProductDTO = createUpdateProductDTO();
             updateProductDTO.setPrice(price);
 
@@ -373,7 +362,6 @@ class ProductControllerTest {
                                 () -> assertEquals(1, output.getErrors().size()),
                                 () -> assertEquals(field, output.getErrors().get(0).getField()),
                                 () -> assertEquals(expectedErrorMessage, output.getErrors().get(0).getMessage())
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
@@ -390,7 +378,7 @@ class ProductControllerTest {
             mockToProductDTO(product, productDTO);
 
             ResultActions response = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/products/{id}", UUID.randomUUID())
+                    MockMvcRequestBuilders.put("/products/{id}", UUID.randomUUID().toString())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(updateProductDTO))
             );
@@ -406,14 +394,13 @@ class ProductControllerTest {
                         assertAll(
                                 () -> assertNotNull(output),
                                 () -> assertEquals(productDTO, output)
-
                         );
                     })
                     .andDo(MockMvcResultHandlers.print());
         }
 
         private void mockUpdateProduct(Product expectedReturn) {
-            Mockito.when(productServiceMocked.updateProduct(Mockito.any(UUID.class), Mockito.any(UpdateProductDTO.class)))
+            Mockito.when(productService.updateProduct(Mockito.any(UUID.class), Mockito.any(UpdateProductDTO.class)))
                     .thenReturn(expectedReturn);
         }
     }
@@ -422,7 +409,7 @@ class ProductControllerTest {
     @DisplayName("inactivate tests")
     class InactivateTest {
         @Test
-        void inactivate_whenCalled_shouldReturnStatus204() throws Exception {
+        void inactivate_whenProductExists_shouldReturnStatus204() throws Exception {
             ResultActions response = mockMvc.perform(
                     MockMvcRequestBuilders.delete("/products/{id}", UUID.randomUUID().toString())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -434,8 +421,7 @@ class ProductControllerTest {
         }
     }
 
-
     private void mockToProductDTO(Product product, ProductDTO expectedReturn) {
-        Mockito.when(productConverterMocked.toProductDTO(product)).thenReturn(expectedReturn);
+        Mockito.when(productConverter.toProductDTO(product)).thenReturn(expectedReturn);
     }
 }

@@ -20,15 +20,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("products")
 public class ProductController {
-
     @Autowired
     private ProductService productService;
     @Autowired
     private ProductConverter productConverter;
 
-    @GetMapping
+    @GetMapping()
     public ResponseEntity<Page<ProductDTO>> list(
-            Pageable pageable,
             @RequestParam(name = "name", required = false)
             String name,
             @RequestParam(name = "price", required = false)
@@ -38,7 +36,8 @@ public class ProductController {
             @RequestParam(name = "category", required = false)
             ProductCategory category,
             @RequestParam(name = "active", required = false)
-            Boolean active
+            Boolean active,
+            Pageable pageable
     ) {
         Page<ProductDTO> productDTOS = this.productService
                 .listProducts(pageable, name, price, ingredients, category, active)

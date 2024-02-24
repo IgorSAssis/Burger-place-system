@@ -91,7 +91,6 @@ public class BoardController {
         );
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> inactivate(
             @PathVariable
