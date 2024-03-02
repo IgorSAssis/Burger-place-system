@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 
 @WebMvcTest(controllers = {ProductController.class})
 @ExtendWith(MockitoExtension.class)
-public class ExceptionHandlerErrorTest {
+public class RestExceptionHandlerTest {
 //    @Autowired
 //    private MockMvc mockMvc;
 //    @Autowired

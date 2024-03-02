@@ -16,7 +16,7 @@ public record OccupationDTO(
         LocalDateTime endOccupation,
         PaymentForm paymentForm,
         Integer peopleCount,
-        OccupationBoardDTO board,
+        BoardDTO board,
         List<OrderItemDTO> orderItems,
         List<CustomerOccupationDTO> customers
 ) {
@@ -27,7 +27,7 @@ public record OccupationDTO(
                 occupation.getEndOccupation(),
                 occupation.getPaymentForm(),
                 occupation.getPeopleCount(),
-                new OccupationBoardDTO(occupation.getBoard()),
+                BoardDTO.builder().number(occupation.getBoard().getNumber()).location(occupation.getBoard().getLocation()).build(),
                 occupation.getOrderItems() != null
                         ? occupation.getOrderItems().stream().map(OrderItemDTO::new).toList()
                         : null,

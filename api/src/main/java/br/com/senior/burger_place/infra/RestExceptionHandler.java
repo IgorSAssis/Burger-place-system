@@ -16,20 +16,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
-public class ExceptionHandlerError {
+public class RestExceptionHandler {
 
-    @ExceptionHandler({
-            EntityNotFoundException.class
-    })
+    @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<SimpleResponseError> handleNotFound(Exception exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SimpleResponseError(exception.getMessage()));
     }
 
-    @ExceptionHandler({
-            DuplicateKeyException.class,
-            NoSuchElementException.class,
-            IllegalArgumentException.class
-    })
+    @ExceptionHandler({DuplicateKeyException.class, NoSuchElementException.class, IllegalArgumentException.class})
     public ResponseEntity<SimpleResponseError> handleBadRequests(Exception exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SimpleResponseError(exception.getMessage()));
     }

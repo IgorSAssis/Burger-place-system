@@ -16,10 +16,14 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class OccupationService {
@@ -33,9 +37,23 @@ public class OccupationService {
     private ProductRepository productRepository;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private OccupationSpecification occupationSpecification;
 
-    public Page<ListOccupationDTO> listOccupations(Pageable pageable) {
-        return this.occupationRepository.findAllByActiveTrue(pageable).map(ListOccupationDTO::new);
+    public Page<Occupation> listOccupations(
+            Pageable pageable,
+            LocalDateTime beginOccupation,
+            LocalDateTime endOccupation,
+            PaymentForm paymentForm,
+            Integer peopleCount,
+            Integer boardNumber,
+            Boolean active
+    ) {
+        Specification<Occupation> specification = this.occupationSpecification.applyFilters(
+                beginOccupation, endOccupation, paymentForm, peopleCount, boardNumber, active
+        );
+
+        return this.occupationRepository.findAll(specification, pageable);
     }
 
     public Optional<OccupationDTO> showOccupation(UUID id) {

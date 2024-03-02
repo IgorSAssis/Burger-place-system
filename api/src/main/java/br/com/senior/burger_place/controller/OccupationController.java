@@ -1,8 +1,9 @@
 package br.com.senior.burger_place.controller;
 
+import br.com.senior.burger_place.domain.occupation.OccupationConverter;
 import br.com.senior.burger_place.domain.occupation.OccupationService;
+import br.com.senior.burger_place.domain.occupation.PaymentForm;
 import br.com.senior.burger_place.domain.occupation.dto.*;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,10 +22,36 @@ import java.util.UUID;
 public class OccupationController {
     @Autowired
     private OccupationService occupationService;
+    @Autowired
+    private OccupationConverter occupationConverter;
 
     @GetMapping
-    public ResponseEntity<Page<ListOccupationDTO>> listOccupations(Pageable pageable) {
-        return ResponseEntity.ok(this.occupationService.listOccupations(pageable));
+    public ResponseEntity<Page<ListOccupationDTO>> list(
+            Pageable pageable,
+            @RequestParam(name = "begin", required = false)
+            LocalDateTime beginOccupation,
+            @RequestParam(name = "end", required = false)
+            LocalDateTime endOccupation,
+            @RequestParam(name = "payment", required = false)
+            PaymentForm paymentForm,
+            @RequestParam(name = "people", required = false)
+            Integer peopleCount,
+            @RequestParam(name = "board", required = false)
+            Integer boardNumber,
+            @RequestParam(name = "active", required = false)
+            Boolean active
+    ) {
+        return ResponseEntity.ok(
+                this.occupationService.listOccupations(
+                        pageable,
+                        beginOccupation,
+                        endOccupation,
+                        paymentForm,
+                        peopleCount,
+                        boardNumber,
+                        active
+                ).map(this.occupationConverter::toListOccupationDTO)
+        );
     }
 
     @GetMapping("/{occupationId}")
@@ -39,7 +66,6 @@ public class OccupationController {
     }
 
     @PostMapping
-    @Transactional
     public ResponseEntity<OccupationDTO> createOccupation(
             @RequestBody
             @Valid
@@ -57,7 +83,6 @@ public class OccupationController {
     }
 
     @PostMapping("/{occupationId}/items")
-    @Transactional
     public ResponseEntity<Void> addOrderItems(
             @PathVariable
             UUID occupationId,
@@ -71,7 +96,6 @@ public class OccupationController {
     }
 
     @DeleteMapping("/{occupationId}/items")
-    @Transactional
     public ResponseEntity<Void> removeOrderItems(
             @PathVariable
             UUID occupationId,
@@ -85,7 +109,6 @@ public class OccupationController {
     }
 
     @PutMapping("/{occupationId}/items/{itemId}")
-    @Transactional
     public ResponseEntity updateOrder(
             @PathVariable
             UUID occupationId,
@@ -101,7 +124,6 @@ public class OccupationController {
     }
 
     @DeleteMapping("/{occupationId}")
-    @Transactional
     public ResponseEntity inactivateOrder(
             @PathVariable
             UUID occupationId
@@ -112,7 +134,6 @@ public class OccupationController {
     }
 
     @PatchMapping("/{occupationId}/items/{itemId}/start-preparation")
-    @Transactional
     public ResponseEntity startOrderItemPreparation(
             @PathVariable
             UUID occupationId,
@@ -125,7 +146,6 @@ public class OccupationController {
     }
 
     @PatchMapping("/{occupationId}/items/{itemId}/finish-preparation")
-    @Transactional
     public ResponseEntity finishOrderItemPreparation(
             @PathVariable
             UUID occupationId,
@@ -138,7 +158,6 @@ public class OccupationController {
     }
 
     @PatchMapping("/{occupationId}/items/{itemId}/deliver")
-    @Transactional
     public ResponseEntity deliverOrderItemPreparation(
             @PathVariable
             UUID occupationId,
@@ -151,7 +170,6 @@ public class OccupationController {
     }
 
     @PatchMapping("/{occupationId}/items/{itemId}/cancel")
-    @Transactional
     public ResponseEntity cancelOrderItem(
             @PathVariable
             UUID occupationId,
@@ -164,7 +182,6 @@ public class OccupationController {
     }
 
     @PatchMapping("/{occupationId}/finish")
-    @Transactional
     public ResponseEntity finishOccupation(
             @PathVariable
             UUID occupationId,
