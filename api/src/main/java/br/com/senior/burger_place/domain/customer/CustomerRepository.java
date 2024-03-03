@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,13 +16,7 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Optional<Customer> findByIdAndActiveTrue(UUID id);
 
-    @Query("""
-            SELECT customer
-            FROM Customer customer
-            WHERE customer.id IN ?1
-            AND   customer.active = true
-            """)
-    Set<Customer> getCustomers(Set<UUID> customersId);
+    Set<Customer> findByIdInAndActiveTrue(Set<UUID> ids);
 
     boolean existsByCpf(String cpf);
 

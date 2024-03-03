@@ -12,6 +12,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "customers")
 @Entity(name = "Customer")
+@EqualsAndHashCode(of = "id")
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

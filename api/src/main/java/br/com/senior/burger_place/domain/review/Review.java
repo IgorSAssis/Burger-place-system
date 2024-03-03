@@ -38,7 +38,8 @@ public class Review {
         if (comment != null && !comment.trim().isEmpty()) {
             this.comment = comment;
         }
-        this.occupation = new Occupation(occupationId);
+        this.occupation = new Occupation();
+        this.occupation.setId(occupationId);
     }
 
     public void updateInformation(ReviewUpdateDTO data) {

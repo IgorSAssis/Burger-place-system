@@ -2,7 +2,6 @@ package br.com.senior.burger_place.domain.occupation;
 
 import br.com.senior.burger_place.domain.board.Board;
 import br.com.senior.burger_place.domain.customer.Customer;
-import br.com.senior.burger_place.domain.occupation.dto.FinishOccupationDTO;
 import br.com.senior.burger_place.domain.orderItem.OrderItem;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,7 +29,8 @@ public class Occupation {
     @Enumerated(EnumType.STRING)
     private PaymentForm paymentForm;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "occupation")
-    private List<OrderItem> orderItems;
+    @Builder.Default
+    private List<OrderItem> orderItems = List.of();
     @ManyToOne(fetch = FetchType.LAZY)
     private Board board;
     @ManyToMany
@@ -39,26 +39,17 @@ public class Occupation {
             joinColumns = @JoinColumn(name = "occupation_id"),
             inverseJoinColumns = @JoinColumn(name = "customer_id")
     )
-    private Set<Customer> customers;
-    private boolean active;
-
-    public Occupation(LocalDateTime beginOccupation, Integer peopleCount, Board board) {
-        this.beginOccupation = beginOccupation;
-        this.peopleCount = peopleCount;
-        this.board = board;
-        this.active = true;
-    }
-
-    public Occupation(UUID occupationId) {
-        this.id = occupationId;
-    }
+    @Builder.Default
+    private Set<Customer> customers = Set.of();
+    @Builder.Default
+    private boolean active = true;
 
     public void inactivate() {
         this.active = false;
     }
 
-    public void finish(FinishOccupationDTO occupationDTO) {
-        this.endOccupation = occupationDTO.endOccupation();
-        this.paymentForm = occupationDTO.paymentForm();
+    public void finish(LocalDateTime endOccupation, PaymentForm paymentForm) {
+        this.endOccupation = endOccupation;
+        this.paymentForm = paymentForm;
     }
 }

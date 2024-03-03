@@ -1,5 +1,6 @@
 package br.com.senior.burger_place.controller;
 
+import br.com.senior.burger_place.domain.occupation.Occupation;
 import br.com.senior.burger_place.domain.occupation.OccupationConverter;
 import br.com.senior.burger_place.domain.occupation.OccupationService;
 import br.com.senior.burger_place.domain.occupation.PaymentForm;
@@ -14,7 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -59,10 +59,9 @@ public class OccupationController {
             @PathVariable
             UUID occupationId
     ) {
-        Optional<OccupationDTO> orderOptional = this.occupationService.showOccupation(occupationId);
-
-        return orderOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-
+        return ResponseEntity.ok(
+                this.occupationConverter.toOccupationDTO(this.occupationService.showOccupation(occupationId))
+        );
     }
 
     @PostMapping
@@ -72,14 +71,15 @@ public class OccupationController {
             CreateOccupationDTO orderDTO,
             UriComponentsBuilder uriComponentsBuilder
     ) {
-        OccupationDTO occupationDTO = this.occupationService.createOccupation(orderDTO);
+        Occupation occupation = this.occupationService.createOccupation(orderDTO);
 
         URI uri = uriComponentsBuilder
                 .path("/occupations/{occupationId}")
-                .buildAndExpand(occupationDTO.id())
+                .buildAndExpand(occupation.getId())
                 .toUri();
 
-        return ResponseEntity.created(uri).body(occupationDTO);
+        return ResponseEntity.created(uri)
+                .body(this.occupationConverter.toOccupationDTO(occupation));
     }
 
     @PostMapping("/{occupationId}/items")
