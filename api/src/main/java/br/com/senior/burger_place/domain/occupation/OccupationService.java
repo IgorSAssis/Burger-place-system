@@ -2,8 +2,10 @@ package br.com.senior.burger_place.domain.occupation;
 
 import br.com.senior.burger_place.domain.board.Board;
 import br.com.senior.burger_place.domain.board.BoardRepository;
+import br.com.senior.burger_place.domain.board.BoardService;
 import br.com.senior.burger_place.domain.customer.Customer;
 import br.com.senior.burger_place.domain.customer.CustomerRepository;
+import br.com.senior.burger_place.domain.customer.CustomerService;
 import br.com.senior.burger_place.domain.occupation.dto.*;
 import br.com.senior.burger_place.domain.orderItem.OrderItem;
 import br.com.senior.burger_place.domain.orderItem.OrderItemRepository;
@@ -13,13 +15,18 @@ import br.com.senior.burger_place.domain.product.ProductRepository;
 import br.com.senior.burger_place.domain.validation.InvalidDTOValidation;
 import br.com.senior.burger_place.domain.validation.InvalidIdValidation;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class OccupationService {
@@ -33,81 +40,68 @@ public class OccupationService {
     private ProductRepository productRepository;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private OccupationSpecification occupationSpecification;
+    @Autowired
+    private BoardService boardService;
+    @Autowired
+    private CustomerService customerService;
 
-    public Page<ListOccupationDTO> listOccupations(Pageable pageable) {
-        return this.occupationRepository.findAllByActiveTrue(pageable).map(ListOccupationDTO::new);
-    }
-
-    public Optional<OccupationDTO> showOccupation(UUID id) {
-        InvalidIdValidation.validate(id);
-
-        Occupation occupation = this.occupationRepository.getReferenceByIdAndActiveTrue(id);
-
-        if (occupation == null) {
-            return Optional.empty();
-        }
-
-        OccupationDTO occupationDTO = new OccupationDTO(occupation);
-
-        return Optional.of(occupationDTO);
-    }
-
-    public OccupationDTO createOccupation(CreateOccupationDTO orderData) {
-        InvalidDTOValidation.validate(orderData);
-
-        if (orderData.boardId() == null) {
-            throw new IllegalArgumentException("ID da mesa é inválida");
-        }
-
-        if (orderData.beginOccupation() == null) {
-            throw new IllegalArgumentException("Data de início da ocupação é inválida");
-        }
-
-        if (orderData.beginOccupation().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("A data de entrada deve ser menor ou igual a atual");
-        }
-
-        if (orderData.peopleCount() == null || orderData.peopleCount() <= 0) {
-            throw new IllegalArgumentException("Quantidade de pessoas é inválida");
-        }
-
-        Board board = this.boardRepository.getReferenceByIdAndActiveTrue(orderData.boardId());
-
-        if (board == null) {
-            throw new EntityNotFoundException("Mesa não existe ou foi inativada");
-        }
-
-        if (this.boardRepository.isBoardOccupied(orderData.boardId())) {
-            throw new IllegalArgumentException("Mesa já está ocupada");
-        }
-
-        if (board.getCapacity() < orderData.peopleCount()) {
-            throw new IllegalArgumentException("Quantidade de pessoas excede a capacidade da mesa");
-        }
-
-        Occupation occupation = new Occupation(
-                orderData.beginOccupation(),
-                orderData.peopleCount(),
-                board
+    public Page<Occupation> listOccupations(
+            Pageable pageable,
+            LocalDateTime beginOccupation,
+            LocalDateTime endOccupation,
+            PaymentForm paymentForm,
+            Integer peopleCount,
+            Integer boardNumber,
+            Boolean active
+    ) {
+        Specification<Occupation> specification = this.occupationSpecification.applyFilters(
+                beginOccupation, endOccupation, paymentForm, peopleCount, boardNumber, active
         );
 
-        if (orderData.customerIds() != null && !orderData.customerIds().isEmpty()) {
-            Set<Customer> customers = this.customerRepository.getCustomers(orderData.customerIds());
+        return this.occupationRepository.findAll(specification, pageable);
+    }
 
-            if (customers.isEmpty()) {
-                throw new EntityNotFoundException("Clientes não existem ou foram desativados");
-            }
+    public Occupation showOccupation(
+            @NonNull
+            UUID id
+    ) {
+        return this.occupationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Occupation does not exist"));
+    }
 
-            if (orderData.customerIds().size() != customers.size()) {
-                throw new IllegalArgumentException("Algum cliente não existe ou foi desativado");
-            }
+    public Occupation createOccupation(
+            @NonNull
+            @Valid
+            CreateOccupationDTO createOccupationDTO
+    ) {
+        Board board = this.boardService.showBoard(createOccupationDTO.getBoardId());
 
+        if (!board.getActive()) {
+            throw new IllegalArgumentException("Board is inactive");
+        }
+
+        if (board.getOccupied()) {
+            throw new IllegalArgumentException("Board already occupied");
+        }
+
+        if (board.getCapacity() < createOccupationDTO.getPeopleCount()) {
+            throw new IllegalArgumentException("People count exceeds capacity of the board");
+        }
+
+        Occupation occupation = Occupation.builder()
+                .beginOccupation(createOccupationDTO.getBeginOccupation())
+                .peopleCount(createOccupationDTO.getPeopleCount())
+                .board(board)
+                .build();
+
+        if (createOccupationDTO.getCustomerIds() != null && !createOccupationDTO.getCustomerIds().isEmpty()) {
+            Set<Customer> customers = this.customerService.findCustomersById(createOccupationDTO.getCustomerIds());
             occupation.setCustomers(customers);
         }
 
-        Occupation savedOccupation = this.occupationRepository.save(occupation);
-
-        return new OccupationDTO(savedOccupation);
+        return this.occupationRepository.save(occupation);
     }
 
     public void addOrderItems(UUID occupationId, AddOrderItemsDTO itemsDTO) {
@@ -369,7 +363,7 @@ public class OccupationService {
             }
         });
 
-        occupation.finish(occupationDTO);
+        occupation.finish(occupationDTO.endOccupation(), occupation.getPaymentForm());
 
     }
 }

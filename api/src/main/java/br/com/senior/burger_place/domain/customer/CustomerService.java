@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -91,6 +92,23 @@ public class CustomerService {
         Customer customer = this.findActiveCustomerById(customerId);
 
         customer.inactivate();
+    }
+
+    public Set<Customer> findCustomersById(
+            @NonNull
+            Set<UUID> customerIds
+    ) {
+        Set<Customer> customers = this.customerRepository.findByIdInAndActiveTrue(customerIds);
+
+        if (customers.isEmpty()) {
+            throw new EntityNotFoundException("Customers do not exist or are inactive");
+        }
+
+        if (customerIds.size() != customers.size()) {
+            throw new IllegalArgumentException("Some customers do not exist or are inactive");
+        }
+
+        return customers;
     }
 
     private Customer findActiveCustomerById(UUID customerId) {
